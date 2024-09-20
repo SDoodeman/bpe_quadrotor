@@ -18,15 +18,6 @@ void BpeMode::initialize() {
     aij[1][0] = 1;
     aij[2][1] = 1;
 
-    // for (size_t i = 0; i < n_agents; i++) {
-    //     if (aij[drone_id-1][i]) {
-    //         target_subs_.push_back(node_->create_subscription<nav_msgs::msg::Odometry>(
-    //             "/drone" + std::to_string(i+1) + "/fmu/filter/state", 
-    //             rclcpp::SensorDataQoS(), 
-    //             std::bind(&BpeMode::target_state_callback, this, std::placeholders::_1, i)
-    //         ));
-    //     }
-    // }
     for (size_t i = 0; i < n_agents; i++) {
         if (aij[drone_id-1][i]) {
             target_subs_.push_back(node_->create_subscription<nav_msgs::msg::Odometry>(

@@ -30,7 +30,7 @@ def generate_launch_description():
             'vehicle_id': '1',
         }.items())
 
-    target_launch_file = IncludeLaunchDescription(
+    iris2_launch_file = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris.launch.py')),
         launch_arguments={  # ENU coordinates
             'x':  '3.0',
@@ -38,6 +38,16 @@ def generate_launch_description():
             'z':  '0.0',
             'launch_pegasus': 'false',
             'vehicle_id': '2',
+        }.items())
+
+    iris3_launch_file = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris.launch.py')),
+        launch_arguments={  # ENU coordinates
+            'x':  '6.0',
+            'y':  '0.0',
+            'z':  '0.0',
+            'launch_pegasus': 'false',
+            'vehicle_id': '3',
         }.items())
     
     # -----------------------------------------------
@@ -78,6 +88,20 @@ def generate_launch_description():
         }.items(),
     )
 
+    # Call MAVLINK interface package launch file 
+    mavlink3_interface_launch_file = IncludeLaunchDescription(
+        # Grab the launch file for the mavlink interface
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mavlink_interface'), 'launch/mavlink_interface.launch.py')),
+        # Define costume launch arguments/parameters used for the mavlink interface
+        launch_arguments={
+            'vehicle_id': '3', 
+            'namespace': 'drone',
+            'drone_params': LaunchConfiguration('drone_params'),
+            'connection': 'udp://:14542',
+            'mavlink_forward': "['']"
+        }.items(),
+    )
+
     # Call autopilot package launch file
     autopilot_launch_file = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('autopilot'), 'launch/autopilot.launch.py')),
@@ -100,6 +124,17 @@ def generate_launch_description():
         }.items(),
     )
 
+    # Call autopilot package launch file
+    autopilot3_launch_file = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('autopilot'), 'launch/autopilot.launch.py')),
+        # Define costume launch arguments/parameters used 
+        launch_arguments={
+            'vehicle_id': '3',
+            'namespace': 'drone',
+            'autopilot_yaml': LaunchConfiguration('drone_params'),
+        }.items(),
+    )
+
     # ----------------------------------------
     # ---- RETURN THE LAUNCH DESCRIPTION -----
     # ----------------------------------------
@@ -107,11 +142,14 @@ def generate_launch_description():
         # Launch files for simulation
         gazebo_launch_file,
         iris_launch_file,
-        target_launch_file,
+        iris2_launch_file,
+        iris3_launch_file,
         # Launch files for the control system
         drone_params_file_arg,
         mavlink_interface_launch_file,
         mavlink2_interface_launch_file,
+        mavlink3_interface_launch_file,
         autopilot_launch_file,
-        autopilot2_launch_file
+        autopilot2_launch_file,
+        autopilot3_launch_file
     ])
