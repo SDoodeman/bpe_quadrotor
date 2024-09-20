@@ -1,0 +1,6 @@
+[submodule "pegasus"]
+	path = pegasus
+	url = git@github.com:PegasusResearch/pegasus.git
+[submodule "pegasus_gazebo"]
+	path = pegasus_gazebo
+	url = git@github.com:PegasusResearch/pegasus_gazebo.git

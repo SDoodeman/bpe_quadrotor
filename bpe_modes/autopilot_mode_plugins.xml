@@ -1,0 +1,8 @@
+<library path="bpe_modes">
+
+  <!-- BPE -->
+  <class type="autopilot::BpeMode" base_class_type="autopilot::Mode">
+      <description>Mode for performing bearing persistence of excitation formation control experiments.</description>
+  </class>
+
+</library>

@@ -1,0 +1,125 @@
+/**:
+  ros__parameters:
+    # ----------------------------------------------------------------------------------------------------------
+    # Low-level configurations
+    # ----------------------------------------------------------------------------------------------------------
+    dynamics:
+      mass: 3.50 #Kg
+      thrust_curve:
+        # Formula T(N) = a * arctan(b * input + c) + d   
+        # with input = [0.0, 100.0]
+        identifier: 'Arctan'
+        parameter_names: ["a", "b", "c", "d"]
+        parameters: [18.96362, 0.02335, -0.85863, 13.28857]    # DShot600 configuration
+    # ----------------------------------------------------------------------------------------------------------
+    # Autopilot configurations
+    # ----------------------------------------------------------------------------------------------------------
+    autopilot:
+      # Update rate
+      rate: 50.0 # Hz
+      # ----------------------------------------------------------------------------------------------------------
+      # Definition of the controller that will perform the tracking of references of the different operation modes
+      # ----------------------------------------------------------------------------------------------------------
+      controller: "OnboardController"
+      # Configurations needed by the PX4 controller
+      OnboardController:
+        publishers:
+          control_position: "fmu/in/position"
+          control_body_velocity: "fmu/in/velocity/body"
+          control_inertial_velocity: "fmu/in/velocity/inertial"
+          control_inertial_acceleration: "fmu/in/inertial_acceleration"
+          control_attitude: "fmu/in/force/attitude"
+          control_attitude_rate: "fmu/in/force/attitude_rate"
+      # ----------------------------------------------------------------------------------------------------------
+      # Definition of the geofencing mechanism that will keep the vehicle in safe places
+      # ----------------------------------------------------------------------------------------------------------
+      geofencing: "BoxGeofencing"
+      BoxGeofencing:
+        limits_x: [-10000.0, 10000.0]
+        limits_y: [-10000.0, 10000.0]
+        limits_z: [-10000.0, 10000.0] # NED Coordinades (z-negative is up)
+      # ----------------------------------------------------------------------------------------------------------
+      # Definition of the trajectory manager that generates parameterized trajectories to be followed
+      # ----------------------------------------------------------------------------------------------------------
+      trajectory_manager: "StaticTrajectoryManager"
+      StaticTrajectoryManager:
+        trajectories: ["ArcFactory", "LineFactory", "CircleFactory", "LemniscateFactory", "CSVFactory"]
+        services:
+          reset_trajectory: "autopilot/trajectory/reset"
+        # Individual trajectory setup
+        ArcFactory:
+          service: "autopilot/trajectory/add_arc"
+        LineFactory:
+          service: "autopilot/trajectory/add_line"
+        CircleFactory:
+          service: "autopilot/trajectory/add_circle"
+        LemniscateFactory:
+          service: "autopilot/trajectory/add_lemniscate"
+        CSVFactory:
+          service: "autopilot/trajectory/add_csv"
+      # ---------------------------------------------------------------------------------------------------------
+      # Define the default operation mode (the one which the autopilot initializes at)
+      # ---------------------------------------------------------------------------------------------------------
+      default_mode: "DisarmMode"
+      # Define all the existing operation modes
+      modes: ["DisarmMode", "ArmMode", "TakeoffMode", "OnboardLandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode"]
+      # Configurations of each operating mode:
+      # 1) Define the valid transitions from a given operation mode to other operation modes
+      # 2) Fallback mode if something goes wrong
+      # 3) Other specific operating mode configuration
+      BpeMode:
+        valid_transitions: ["HoldMode", "WaypointMode", "OnboardLandMode"]
+        fallback: "HoldMode"
+        on_finish: "HoldMode"
+        target_state_topic: "target"
+      DisarmMode: 
+        valid_transitions: ["ArmMode"]
+        fallback: "DisarmMode"
+        disarm_service: "fmu/kill_switch"
+      ArmMode: 
+        valid_transitions: ["DisarmMode", "TakeoffMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode"]
+        fallback: "DisarmMode"
+        geofencing_violation_fallback: "DisarmMode"
+        arm_service: "fmu/arm"
+        offboard_service: "fmu/offboard"
+      TakeoffMode: 
+        valid_transitions: ["OnboardLandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode"]
+        fallback: "HoldMode"
+        on_finish: "HoldMode"
+        geofencing_violation_fallback: "HoldMode"
+        takeoff_altitude: -3.0 # m (NED)
+        set_takeoff_altitude_service: "autopilot/set_takeoff"
+      OnboardLandMode: 
+        valid_transitions: ["DisarmMode", "ArmMode", "TakeoffMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode"]
+        fallback: "HoldMode"
+        on_finish: "DisarmMode"
+        land_service: "fmu/land"
+      HoldMode: 
+        valid_transitions: ["OnboardLandMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode"]
+        fallback: "OnboardLandMode"
+      WaypointMode: 
+        valid_transitions: ["LandMode", "HoldMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode"]
+        fallback: "HoldMode"
+        geofencing_violation_fallback: "HoldMode"
+        set_waypoint_service: "autopilot/set_waypoint"
+      FollowTrajectoryMode: 
+        valid_transitions: ["OnboardLandMode", "HoldMode", "WaypointMode", "PassThroughMode", "BpeMode"]
+        fallback: "HoldMode"
+        geofencing_violation_fallback: "HoldMode"
+        on_finish: "HoldMode"
+      PassThroughMode: 
+        valid_transitions: ["DisarmMode", "ArmMode", "TakeoffMode", "OnboardLandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "BpeMode"]
+        fallback: "HoldMode"
+        geofencing_violation_fallback: "HoldMode"
+      # Topics configurations
+      publishers:
+        control_position: "fmu/in/position"
+        control_attitude: "fmu/in/force/attitude"
+        control_attitude_rate: "fmu/in/force/attitude_rate"
+        status: "autopilot/status"
+      subscribers:
+        state: "fmu/filter/state"
+        status: "fmu/status"
+        constants: "fmu/constants"
+      services:
+        set_mode: "autopilot/change_mode"
