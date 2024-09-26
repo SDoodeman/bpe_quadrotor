@@ -65,48 +65,36 @@ class Drone(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    shuttle = Drone(1)
+    shuttles = []
+    n_drones = 2
+    for i in range(n_drones):
+        shuttles.append(Drone(i+1))
 
     # Wait until initial position is received
-    while not shuttle.initial_position_received:
-        rclpy.spin_once(shuttle)
-
-    # Now use the initial position to set waypoints dynamically
-    initial_x = shuttle.initial_x
-    initial_y = shuttle.initial_y
-    initial_z = shuttle.initial_z
+    for i in range(n_drones):
+        while not shuttles[i].initial_position_received:
+            rclpy.spin_once(shuttles[i])
 
     # Arm the drone
-    shuttle.set_autopilot_mode('ArmMode')
-    shuttle.set_autopilot_mode('TakeoffMode')
+    for i in range(n_drones):
+        shuttles[i].set_autopilot_mode('ArmMode')
+
+    time.sleep(2)
+
+    for i in range(n_drones):
+        shuttles[i].set_autopilot_mode('TakeoffMode')
 
     # Wait for takeoff
-    time.sleep(5)
+    time.sleep(7)
 
-    shuttle.set_autopilot_mode('BpeMode')
-    '''
-    # Set waypoints relative to the initial position
-    shuttle.set_waypoint(initial_x, initial_y, initial_z - 10, 0.0)
-    shuttle.set_autopilot_mode('WaypointMode')
+    for i in range(n_drones):
+        shuttles[i].set_autopilot_mode('BpeMode')
 
-    time.sleep(10)
-    shuttle.set_waypoint(initial_x + 10.0, initial_y, initial_z - 10, 0.0)
-
-    time.sleep(10)
-    shuttle.set_waypoint(initial_x + 10.0, initial_y + 10.0, initial_z - 10, 0.0)
-
-    time.sleep(10)
-    shuttle.set_waypoint(initial_x, initial_y + 10.0, initial_z - 10, 0.0)
-
-    time.sleep(10)
-    shuttle.set_waypoint(initial_x, initial_y, initial_z - 10, 0.0)
-
-    time.sleep(10)
-    '''
     # Land the drone
-
     time.sleep(600)
-    shuttle.set_autopilot_mode('OnboardLandMode')
+    for i in range(n_drones):
+        shuttles[i].set_autopilot_mode('OnboardLandMode')
+
     rclpy.shutdown()
 
 if __name__ == "__main__":

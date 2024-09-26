@@ -39,18 +39,39 @@ void BpeMode::initialize() {
         }
     }
 
-    // Load the gains of the controller
+    // Load the gains of the controller (does not work??)
     node_->declare_parameter<double>("autopilot.BpeMode.gains.Kp", 2.0);
     node_->declare_parameter<double>("autopilot.BpeMode.gains.Kv", 0.5);
     node_->declare_parameter<double>("autopilot.BpeMode.gains.Kr", 10.0);
-    Kp = node_->get_parameter("autopilot.BpeMode.gains.Kp").as_double();
-    Kv = node_->get_parameter("autopilot.BpeMode.gains.Kv").as_double();
-    Kr = node_->get_parameter("autopilot.BpeMode.gains.Kr").as_double();
 
     mass = get_vehicle_constants().mass;
 
     for (size_t i = 0; i < n_agents; i++) {
-        pdes[i] = Eigen::Vector3d(0.0, 0.0, -2.0); // TODO verify that this should be negative
+        pdes[i] = Eigen::Vector3d(0.0, 0.0, -1.5 + 0.5 * drone_id);
+    }
+
+    // Initialize the ROS 2 subscribers to the control topics
+    node_->declare_parameter<std::string>("autopilot.BpeController.publishers.control_attitude", "desired_control_attitude");
+    node_->declare_parameter<std::string>("autopilot.BpeController.publishers.control_attitude_rate", "desired_control_attitude_rate");
+    node_->declare_parameter<std::string>("autopilot.BpeController.publishers.control_position", "desired_control_position");
+
+    // Create the publishers
+    desired_attitude_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlAttitude>(node_->get_parameter("autopilot.BpeController.publishers.control_attitude").as_string(), rclcpp::SensorDataQoS());
+    desired_attitude_rate_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlAttitude>(node_->get_parameter("autopilot.BpeController.publishers.control_attitude_rate").as_string(), rclcpp::SensorDataQoS());
+    desired_position_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlPosition>(node_->get_parameter("autopilot.BpeController.publishers.control_position").as_string(), rclcpp::SensorDataQoS());
+
+    Kp = node_->get_parameter("autopilot.BpeMode.gains.Kp").as_double();
+    Kv = node_->get_parameter("autopilot.BpeMode.gains.Kv").as_double();
+    Kr = node_->get_parameter("autopilot.BpeMode.gains.Kr").as_double();
+
+    if (drone_id==1) {
+        Kp = 5.0;
+        Kv = 4.0; // Above 5/6 is unstable
+        Kr = 10.0;
+    } else {
+        Kp = 2.0;
+        Kv = 3.0;
+        Kr = 8;
     }
 
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kp: %f", Kp);
@@ -76,26 +97,26 @@ void BpeMode::update(double dt) {
     for (size_t i = 0; i < n_agents; i++)
     {
         A = double(i+1);
-        omega = 1.0 - i*0.25;
-        pdes[i][0] = A*sin(omega*t);
-        pdes[i][1] = A*cos(omega*t);
-        vdes[i][0] = omega*A*cos(omega*t);
-        vdes[i][1] = -omega*A*sin(omega*t);
-        udes[i][0] = -omega*omega*A*sin(omega*t);
-        udes[i][1] = -omega*omega*A*cos(omega*t);
-        jdes[i][0] = -omega*omega*omega*A*cos(omega*t);
-        jdes[i][1] = omega*omega*omega*A*sin(omega*t);
+        omega = 3.141592 * 2 / 10;
+        pdes[i][0] = A*sin(omega*t - i*3.1415/2);
+        pdes[i][1] = A*cos(omega*t - i*3.1415/2);
+        vdes[i][0] = omega*A*cos(omega*t - i*3.1415/2);
+        vdes[i][1] = -omega*A*sin(omega*t - i*3.1415/2);
+        udes[i][0] = -omega*omega*A*sin(omega*t - i*3.1415/2);
+        udes[i][1] = -omega*omega*A*cos(omega*t - i*3.1415/2);
+        jdes[i][0] = -omega*omega*omega*A*cos(omega*t - i*3.1415/2);
+        jdes[i][1] = omega*omega*omega*A*sin(omega*t - i*3.1415/2);
     }
 
     if (drone_id==1) {
-        u = udes[0] + Kp*(pdes[0] - P) + Kv*(vdes[0] - V);
+        u = udes[0] - Kp*(P - pdes[0]) - Kv*(V - vdes[0]);
     } else {
         u = udes[drone_id-1] - Kv * (V - vdes[drone_id-1]);
         for (size_t j = 0; j < n_agents; j++)
         {
             if (aij[drone_id-1][j])
             {
-                pij = P_other[j] - P; // TODO how to update P_other???
+                pij = P_other[j] - P;
                 gij = pij.normalized();
                 pijd = pdes[j] - pdes[drone_id-1];
                 u = u - Kp*(pijd - gij * gij.dot(pijd));
@@ -103,16 +124,48 @@ void BpeMode::update(double dt) {
         }  
     }
 
-    TRde3 = -mass*g*e3 + mass*u;
+    TRde3 = mass*g*e3 - mass*u;
 
     thrust = TRde3.norm();
     Rde3 = TRde3 / thrust;
 
     attitude_rate = R.transpose() * (
         -Kr * Rde3.cross(R.col(2)) - (mass / thrust) * Rde3.cross((Eigen::Matrix3d::Identity() - Rde3 * Rde3.transpose()) * jdes[drone_id-1])
-    );
+    ) / 3.141592 * 180;
 
-    this->controller_->set_attitude_rate(attitude_rate, thrust, dt); // TODO in rad/s or degrees/s, and roll, pitch, yaw or Z-Y-X?
+    attitude[0] = atan2(-Rde3[1], Rde3[2]) / 3.141592 * 180;
+    attitude[1] = asin(Rde3[0]) / 3.141592 * 180;
+    attitude[2] = 0 / 3.141592 * 180;
+
+    // this->controller_->set_attitude_rate(attitude_rate, thrust, dt);
+    this->controller_->set_attitude(attitude, thrust, dt);
+
+    // Set the attitude control message
+    desired_attitude_msg_.attitude[0] = attitude[0];
+    desired_attitude_msg_.attitude[1] = attitude[1];
+    desired_attitude_msg_.attitude[2] = attitude[2];
+    desired_attitude_msg_.thrust = thrust;
+
+    // Publish the attitude control message for the controller to track
+    desired_attitude_publisher_->publish(desired_attitude_msg_);
+
+    // Set the attitude rate control message
+    desired_attitude_rate_msg_.attitude[0] = attitude_rate[0];
+    desired_attitude_rate_msg_.attitude[1] = attitude_rate[1];
+    desired_attitude_rate_msg_.attitude[2] = attitude_rate[2];
+    desired_attitude_rate_msg_.thrust = thrust;
+
+    // Publish the position control message for the controller to track
+    desired_attitude_rate_publisher_->publish(desired_attitude_rate_msg_);
+
+    // Set the attitude rate control message
+    desired_position_msg_.position[0] = pdes[drone_id-1][0];
+    desired_position_msg_.position[1] = pdes[drone_id-1][1];
+    desired_position_msg_.position[2] = pdes[drone_id-1][2];
+    // desired_position_msg_.yaw = thrust;
+
+    // Publish the attitude rate control message for the controller to track
+    desired_position_publisher_->publish(desired_position_msg_);
 }
 
 

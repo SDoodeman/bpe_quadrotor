@@ -2,6 +2,8 @@
 
 #include <autopilot/mode.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include "pegasus_msgs/msg/control_attitude.hpp"
+#include "pegasus_msgs/msg/control_position.hpp"
 
 namespace autopilot {
 
@@ -61,6 +63,7 @@ protected:
     Eigen::Vector3d pij{Eigen::Vector3d::Zero()};
     Eigen::Vector3d gij{Eigen::Vector3d::Zero()};
     Eigen::Vector3d pijd{Eigen::Vector3d::Zero()};
+    Eigen::Vector3d attitude = Eigen::Vector3d::Zero();
     Eigen::Vector3d attitude_rate = Eigen::Vector3d::Zero();
     std::vector<Eigen::Vector3d> P_other{static_cast<size_t>(n_agents), Eigen::Vector3d::Zero()};
 
@@ -70,5 +73,15 @@ protected:
 
     // Operation Mode
     OperationMode operation_mode_{BPE_OFF};
+
+    // ROS2 messages
+    pegasus_msgs::msg::ControlAttitude desired_attitude_msg_;
+    pegasus_msgs::msg::ControlAttitude desired_attitude_rate_msg_;
+    pegasus_msgs::msg::ControlPosition desired_position_msg_;
+
+    // ROS2 publishers
+    rclcpp::Publisher<pegasus_msgs::msg::ControlAttitude>::SharedPtr desired_attitude_publisher_{nullptr};
+    rclcpp::Publisher<pegasus_msgs::msg::ControlAttitude>::SharedPtr desired_attitude_rate_publisher_{nullptr};
+    rclcpp::Publisher<pegasus_msgs::msg::ControlPosition>::SharedPtr desired_position_publisher_{nullptr};
 };
 }
