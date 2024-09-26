@@ -16,39 +16,42 @@ class Drone(Node):
         self.id = id
         self.namespace = 'drone'
 
-        # Variables to store the initial position
-        self.initial_position_received = False
-        self.initial_x = 0.0
-        self.initial_y = 0.0
-        self.initial_z = 0.0
-
         # Create the service clients for the drone
-        self.add_waypoint_srv = self.create_client(Waypoint, '/drone' + str(id) + '/autopilot/set_waypoint')
+        self.add_waypoint_srv = self.create_client(Waypoint, '/drone' + str(id) +'/autopilot/set_waypoint')
+        print('Initializing service: /drone' + str(id) +'/autopilot/set_waypoint')
         while not self.add_waypoint_srv.wait_for_service(timeout_sec=10.0):
-            self.get_logger().info('Waypoint service not available, waiting again...')
+            self.get_logger().info('service not availtimeout_secable, waiting again...')
 
-        self.set_autopilot_srv = self.create_client(SetMode, '/drone' + str(id) + '/autopilot/change_mode')
+        self.add_circle_srv = self.create_client(AddCircle, '/drone' + str(id) +'/autopilot/trajectory/add_circle')
+        print('Initializing service: /drone' + str(id) +'/autopilot/add_circle')
+        while not self.add_circle_srv.wait_for_service(timeout_sec=10.0):
+            self.get_logger().info('service not available, waiting again...')
+
+        self.set_autopilot_srv = self.create_client(SetMode, '/drone' + str(id) +'/autopilot/change_mode')
+        print('Initializing service: /drone' + str(id) +'/autopilot/change_mode')
         while not self.set_autopilot_srv.wait_for_service(timeout_sec=10.0):
-            self.get_logger().info('Set Mode service not available, waiting again...')
+            self.get_logger().info('service not available, waiting again...')
 
-        # Create subscriptions to listen to the drone's position (replace PositionStatus with your message type)
-        self.create_subscription(Odometry, '/drone' + str(id) + '/fmu/filter/state', self.position_status_callback, qos_profile_sensor_data)
+        # Create subscriptions
+        self.create_subscription(AutopilotStatus, '/drone' + str(id) + '/autopilot/status', self.autopilot_status_callback, qos_profile_sensor_data)
 
         # Requests messages
         self.waypoint_req = Waypoint.Request()
+        self.circle_req = AddCircle.Request()
         self.set_mode_req = SetMode.Request()
 
-    def position_status_callback(self, msg):
-        if not self.initial_position_received:
-            self.initial_x = msg.pose.pose.position.x
-            self.initial_y = msg.pose.pose.position.y
-            self.initial_z = msg.pose.pose.position.z
-            self.initial_position_received = True
-            self.get_logger().info(f'Initial position saved: ({self.initial_x}, {self.initial_y}, {self.initial_z})')
+
+    def autopilot_status_callback(self, msg):
+        self.get_logger().info('Received autopilot status: %s' % msg.mode)
 
     def set_autopilot_mode(self, mode='DisarmMode'):
-        self.get_logger().info(f'Setting autopilot mode to: {mode}')
+
+        self.get_logger().info('Setting autopilot mode to: %s' % mode)
+            
+        # Set the mode request
         self.set_mode_req.mode = mode
+        
+        # Make an async request
         self.future = self.set_autopilot_srv.call_async(self.set_mode_req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
@@ -59,41 +62,47 @@ class Drone(Node):
         self.waypoint_req.position[1] = y
         self.waypoint_req.position[2] = z
         self.waypoint_req.yaw = yaw
+        
+        # Make an async request
         self.future = self.add_waypoint_srv.call_async(self.waypoint_req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
 def main(args=None):
     rclpy.init(args=args)
-    shuttles = []
+    drones = []
     n_drones = 2
     for i in range(n_drones):
-        shuttles.append(Drone(i+1))
+        drones.append(Drone(i+1))
 
     # Wait until initial position is received
     for i in range(n_drones):
-        while not shuttles[i].initial_position_received:
-            rclpy.spin_once(shuttles[i])
+        while not drones[i].initial_position_received:
+            rclpy.spin_once(drones[i])
 
     # Arm the drone
     for i in range(n_drones):
-        shuttles[i].set_autopilot_mode('ArmMode')
+        drones[i].set_autopilot_mode('ArmMode')
 
     time.sleep(2)
 
     for i in range(n_drones):
-        shuttles[i].set_autopilot_mode('TakeoffMode')
+        drones[i].set_autopilot_mode('TakeoffMode')
 
     # Wait for takeoff
     time.sleep(7)
 
     for i in range(n_drones):
-        shuttles[i].set_autopilot_mode('BpeMode')
+        drones[i].set_autopilot_mode('BpeMode')
 
     # Land the drone
     time.sleep(600)
     for i in range(n_drones):
-        shuttles[i].set_autopilot_mode('OnboardLandMode')
+        drones[i].set_autopilot_mode('OnboardLandMode')
+
+    # Shutdown the demo
+    for i in range(n_drones):
+        drones[i].destroy_node()
 
     rclpy.shutdown()
 
