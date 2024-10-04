@@ -17,17 +17,26 @@ void BpeMode::initialize() {
     
     aij[1][0] = 1;
     aij[2][1] = 1;
+    sim = true;
 
     for (size_t i = 0; i < n_agents; i++) {
         if (aij[drone_id-1][i]) {
             target_subs_.push_back(node_->create_subscription<nav_msgs::msg::Odometry>(
-                "/drone" + std::to_string(i+1) + "/fmu/filter/state", 
-                rclcpp::SensorDataQoS(), 
+                "/drone" + std::to_string(i+1) + "/fmu/filter/state",
+                rclcpp::SensorDataQoS(),
                 [this, i](const nav_msgs::msg::Odometry::ConstSharedPtr msg) {
                     this->target_state_callback(msg, i);  // Capture i and pass to callback
                 }
             ));
         }
+    }
+    
+    if (sim) {
+        time_sub = node_->create_subscription<rosgraph_msgs::msg::Clock>(
+            "/clock", 
+            rclcpp::SensorDataQoS(),
+            std::bind(&BpeMode::gz_clock_callback, this, std::placeholders::_1)
+        );
     }
 
     // Load the gains of the controller (does not work??)
@@ -38,7 +47,7 @@ void BpeMode::initialize() {
     mass = get_vehicle_constants().mass;
 
     for (size_t i = 0; i < n_agents; i++) {
-        pdes[i] = Eigen::Vector3d(0.0, 0.0, -1.5 + 0.5 * drone_id);
+        pdes[i] = Eigen::Vector3d(0.0, 0.0, -2);
     }
 
     // Initialize the ROS 2 subscribers to the control topics
@@ -56,13 +65,13 @@ void BpeMode::initialize() {
     Kr = node_->get_parameter("autopilot.BpeMode.gains.Kr").as_double();
 
     if (drone_id==1) {
-        Kp = 5.0;
+        Kp = 10.0;
         Kv = 4.0; // Above 5/6 is unstable
-        Kr = 10.0;
+        Kr = 10.0; // Above 11 is unstable
     } else {
         Kp = 2.0;
-        Kv = 3.0;
-        Kr = 8;
+        Kv = 4.0;
+        Kr = 10.0;
     }
 
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kp: %f", Kp);
@@ -83,7 +92,9 @@ void BpeMode::update(double dt) {
     update_vehicle_state();
 
     // Unknown variables!
-    t += dt;
+    if (!sim) {
+        t += dt;
+    }
 
     for (size_t i = 0; i < n_agents; i++)
     {
@@ -128,8 +139,8 @@ void BpeMode::update(double dt) {
     attitude[1] = asin(Rde3[0]) / 3.141592 * 180;
     attitude[2] = 0 / 3.141592 * 180;
 
-    // this->controller_->set_attitude_rate(attitude_rate, thrust, dt);
-    this->controller_->set_attitude(attitude, thrust, dt);
+    this->controller_->set_attitude_rate(attitude_rate, thrust, dt);
+    // this->controller_->set_attitude(attitude, thrust, dt);
 
     // Set the attitude control message
     desired_attitude_msg_.attitude[0] = attitude[0];
@@ -168,6 +179,13 @@ void BpeMode::target_state_callback(const nav_msgs::msg::Odometry::ConstSharedPt
 
     // Update the position of the other targets
     P_other[id] = Eigen::Vector3d(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+    if (sim) {
+        P_other[id][1] += id*3.0;
+    }
+}
+
+void BpeMode::gz_clock_callback(const rosgraph_msgs::msg::Clock::ConstSharedPtr msg) {
+    t = 1.0*msg->clock.sec + 1e-9*msg->clock.nanosec;
 }
 
 void BpeMode::update_vehicle_state() {
@@ -177,6 +195,9 @@ void BpeMode::update_vehicle_state() {
 
     // Update the MPC state
     P = state.position;
+    if (sim) {
+        P[1] += (drone_id-1)*3.0;
+    }
     V = state.velocity;
     Eigen::Quaterniond q(state.attitude.w(), state.attitude.x(), state.attitude.y(), state.attitude.z());
     q.normalize();

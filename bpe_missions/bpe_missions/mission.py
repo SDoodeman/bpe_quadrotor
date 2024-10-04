@@ -71,14 +71,14 @@ class Drone(Node):
 def main(args=None):
     rclpy.init(args=args)
     drones = []
-    n_drones = 2
+    n_drones = 3
     for i in range(n_drones):
         drones.append(Drone(i+1))
 
     # Wait until initial position is received
-    for i in range(n_drones):
-        while not drones[i].initial_position_received:
-            rclpy.spin_once(drones[i])
+    # for i in range(n_drones):
+    #     while not drones[i].initial_position_received:
+    #         rclpy.spin_once(drones[i])
 
     # Arm the drone
     for i in range(n_drones):

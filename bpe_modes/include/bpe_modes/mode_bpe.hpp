@@ -2,6 +2,7 @@
 
 #include <autopilot/mode.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <rosgraph_msgs/msg/clock.hpp>
 #include "pegasus_msgs/msg/control_attitude.hpp"
 #include "pegasus_msgs/msg/control_position.hpp"
 
@@ -22,6 +23,7 @@ public:
 
     void update_vehicle_state();
     void target_state_callback(const nav_msgs::msg::Odometry::ConstSharedPtr msg, int id);
+    void gz_clock_callback(const rosgraph_msgs::msg::Clock::ConstSharedPtr msg);
 
 protected:
 
@@ -35,8 +37,9 @@ protected:
     double mass;
     double thrust{0};
     double t{0};
+    bool sim{true};
     int n_agents{3};
-    int drone_id{1}; // TODO ???
+    int drone_id{1};
     int aij[3][3] = {
         {0, 0, 0},
         {0, 0, 0},
@@ -45,6 +48,7 @@ protected:
 
     // Subscribers vector for the position of each drone
     std::vector<rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr> target_subs_;
+    rclcpp::Subscription<rosgraph_msgs::msg::Clock>::SharedPtr time_sub;
 
     // Trajectory variables
     Eigen::Vector3d P{Eigen::Vector3d::Zero()};     // Position
