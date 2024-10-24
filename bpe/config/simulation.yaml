@@ -99,9 +99,9 @@
         leader_id: 1
         gains:
           leader:
-            Kp: 7.5
-            Kv: 3.0
-            Kr: 8.0
+            Kp: 10.0
+            Kv: 4.0
+            Kr: 10.0
           followers:
             Kp: 2.0
             Kv: 4.0

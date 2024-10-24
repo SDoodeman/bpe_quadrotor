@@ -104,11 +104,11 @@ def main(args=None):
     time.sleep(7)
 
     # Set waypoints with yaw at 0
-    for i in range(n_drones):
-        drones[i].set_waypoint(drones[i].pos_x, drones[i].pos_y, -2.0, 0.0)
-        drones[i].set_autopilot_mode('WaypointMode')
+    # for i in range(n_drones):
+    #     drones[i].set_waypoint(drones[i].pos_x, drones[i].pos_y, -2.0, 0.0)
+    #     drones[i].set_autopilot_mode('WaypointMode')
 
-    time.sleep(3)
+    # time.sleep(3)
 
     # Start the mission
     for i in range(n_drones):
@@ -117,7 +117,7 @@ def main(args=None):
     # Land the drone
     time.sleep(600)
     for i in range(n_drones):
-        drones[i].set_autopilot_mode('OnboardLandMode')
+        drones[i].set_autopilot_mode('LandMode')
 
     # Shutdown the demo
     for i in range(n_drones):
