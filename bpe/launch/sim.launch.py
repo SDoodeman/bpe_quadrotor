@@ -143,13 +143,13 @@ def generate_launch_description():
         gazebo_launch_file,
         iris_launch_file,
         iris2_launch_file,
-        iris3_launch_file,
+        #iris3_launch_file,
         # Launch files for the control system
         drone_params_file_arg,
         mavlink_interface_launch_file,
         mavlink2_interface_launch_file,
-        mavlink3_interface_launch_file,
+        #mavlink3_interface_launch_file,
         autopilot_launch_file,
         autopilot2_launch_file,
-        autopilot3_launch_file
+        #autopilot3_launch_file
     ])

@@ -4,7 +4,6 @@ from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from pegasus_msgs.srv import Waypoint, AddCircle, SetMode
 from pegasus_msgs.msg import AutopilotStatus
-from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 
 
@@ -15,6 +14,11 @@ class Drone(Node):
 
         self.id = id
         self.namespace = 'drone'
+
+        # Variables to store the position of the drone
+        self.pos_x = 0.0
+        self.pos_y = 0.0
+        self.pos_z = 0.0
 
         # Create the service clients for the drone
         self.add_waypoint_srv = self.create_client(Waypoint, '/drone' + str(id) +'/autopilot/set_waypoint')
@@ -34,6 +38,9 @@ class Drone(Node):
 
         # Create subscriptions
         self.create_subscription(AutopilotStatus, '/drone' + str(id) + '/autopilot/status', self.autopilot_status_callback, qos_profile_sensor_data)
+
+        # Create subscriptions to listen to the drone's position (replace PositionStatus with your message type)
+        self.create_subscription(Odometry, '/drone' + str(id) + '/fmu/filter/state', self.position_status_callback, qos_profile_sensor_data)
 
         # Requests messages
         self.waypoint_req = Waypoint.Request()
@@ -67,18 +74,22 @@ class Drone(Node):
         self.future = self.add_waypoint_srv.call_async(self.waypoint_req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
+    
+    def position_status_callback(self, msg):
+        self.pos_x = msg.pose.pose.position.x
+        self.pos_y = msg.pose.pose.position.y
+        self.pos_z = msg.pose.pose.position.z
+           
 
 def main(args=None):
     rclpy.init(args=args)
-    drones = []
-    n_drones = 3
-    for i in range(n_drones):
-        drones.append(Drone(i+1))
 
-    # Wait until initial position is received
-    # for i in range(n_drones):
-    #     while not drones[i].initial_position_received:
-    #         rclpy.spin_once(drones[i])
+    drones = []
+    n_drones = 2
+    leader_id = 1
+
+    for i in range(n_drones):
+        drones.append(Drone(i+leader_id))
 
     # Arm the drone
     for i in range(n_drones):
@@ -92,6 +103,14 @@ def main(args=None):
     # Wait for takeoff
     time.sleep(7)
 
+    # Set waypoints with yaw at 0
+    for i in range(n_drones):
+        drones[i].set_waypoint(drones[i].pos_x, drones[i].pos_y, -2.0, 0.0)
+        drones[i].set_autopilot_mode('WaypointMode')
+
+    time.sleep(3)
+
+    # Start the mission
     for i in range(n_drones):
         drones[i].set_autopilot_mode('BpeMode')
 

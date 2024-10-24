@@ -95,11 +95,17 @@
         valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
         fallback: "HoldMode"
         on_finish: "HoldMode"
-        target_state_topic: "target"
+        simulation: True
+        leader_id: 1
         gains:
-          Kp: 2.0
-          Kv: 0.5
-          Kr: 10.0
+          leader:
+            Kp: 7.5
+            Kv: 3.0
+            Kr: 8.0
+          followers:
+            Kp: 2.0
+            Kv: 4.0
+            Kr: 10.0
       DisarmMode: 
         valid_transitions: ["ArmMode"]
         fallback: "DisarmMode"

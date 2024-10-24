@@ -12,8 +12,6 @@ class BpeMode : public autopilot::Mode {
 
 public:
 
-    enum OperationMode {BPE_OFF, BPE_ON};
-
     ~BpeMode();
 
     void initialize() override;
@@ -21,8 +19,16 @@ public:
     virtual bool exit() override;
     virtual void update(double dt);
 
+    // Get the current vehicle state
     void update_vehicle_state();
+
+    // Auxiliar method to update the desired trajectory
+    void update_desired_trajectory();
+
+    // Get the state of the other agents
     void target_state_callback(const nav_msgs::msg::Odometry::ConstSharedPtr msg, int id);
+
+    // Get the current simulation time (if running in sim mode)
     void gz_clock_callback(const rosgraph_msgs::msg::Clock::ConstSharedPtr msg);
 
 protected:
@@ -40,17 +46,23 @@ protected:
     bool sim{true};
     int n_agents{3};
     int drone_id{1};
+
     int aij[3][3] = {
         {0, 0, 0},
         {0, 0, 0},
         {0, 0, 0},
     };
 
+    // Defines the id of the leader vehicle (by default 1 and the other vehicles follow)
+    int leader_id{1};
+
     // Subscribers vector for the position of each drone
     std::vector<rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr> target_subs_;
     rclcpp::Subscription<rosgraph_msgs::msg::Clock>::SharedPtr time_sub;
 
+    // --------------------
     // Trajectory variables
+    // --------------------
     Eigen::Vector3d P{Eigen::Vector3d::Zero()};     // Position
     Eigen::Vector3d V{Eigen::Vector3d::Zero()};     // Velocity
     Eigen::Matrix3d R{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
@@ -59,7 +71,9 @@ protected:
     std::vector<Eigen::Vector3d> udes{static_cast<size_t>(n_agents), Eigen::Vector3d::Zero()};
     std::vector<Eigen::Vector3d> jdes{static_cast<size_t>(n_agents), Eigen::Vector3d::Zero()};
 
+    // -----------------
     // Control variables
+    // -----------------
     Eigen::Vector3d u{Eigen::Vector3d::Zero()};
     Eigen::Vector3d TRde3{Eigen::Vector3d::Zero()};
     Eigen::Vector3d Rde3{Eigen::Vector3d::Zero()};
@@ -74,9 +88,6 @@ protected:
     // Control inputs to apply to the vehicle
     Eigen::Vector3d velocity_;
     Eigen::Vector3d acel_;
-
-    // Operation Mode
-    OperationMode operation_mode_{BPE_OFF};
 
     // ROS2 messages
     pegasus_msgs::msg::ControlAttitude desired_attitude_msg_;
