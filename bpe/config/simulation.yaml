@@ -99,13 +99,17 @@
         leader_id: 1
         gains:
           leader:
-            Kp: 10.0
-            Kv: 4.0
-            Kr: 10.0
+            Kp: 7.5     # Proportional term to the trajectory
+            Kv: 3.0     # Derivative term to the trajectory
+            Kr: 8.0     # Atittude term
           followers:
-            Kp: 2.0
-            Kv: 4.0
-            Kr: 10.0
+            Kp: 2.5     # Proportional term of the relative bearing error
+            Kv: 2.0
+            Kr: 8.0
+        trajectory:
+          z: -1.5          # The height of the circles
+          A_offset: 1.0    # Circles amplitude offset
+          frequency: 0.1   # Frequency in Hz
       DisarmMode: 
         valid_transitions: ["ArmMode"]
         fallback: "DisarmMode"

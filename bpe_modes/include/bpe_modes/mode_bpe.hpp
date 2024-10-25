@@ -28,9 +28,6 @@ public:
     // Get the state of the other agents
     void target_state_callback(const nav_msgs::msg::Odometry::ConstSharedPtr msg, int id);
 
-    // Get the current simulation time (if running in sim mode)
-    void gz_clock_callback(const rosgraph_msgs::msg::Clock::ConstSharedPtr msg);
-
 protected:
 
     // Gains
@@ -39,7 +36,6 @@ protected:
     double Kr{1.0};
 
     // General parameters
-    double g{9.81};
     double mass;
     double thrust{0};
     double t{0};
@@ -55,6 +51,11 @@ protected:
 
     // Defines the id of the leader vehicle (by default 1 and the other vehicles follow)
     int leader_id{1};
+
+    // Trajectory parameters
+    double A_offset_;
+    double frequency_;
+    double z_;
 
     // Subscribers vector for the position of each drone
     std::vector<rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr> target_subs_;

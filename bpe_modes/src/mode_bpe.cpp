@@ -41,15 +41,6 @@ void BpeMode::initialize() {
             ));
         }
     }
-    
-    // If running in simulation mode, subscribe to the Gazebo clock
-    if (sim) {
-        time_sub = node_->create_subscription<rosgraph_msgs::msg::Clock>(
-            "/clock", 
-            rclcpp::SensorDataQoS(),
-            std::bind(&BpeMode::gz_clock_callback, this, std::placeholders::_1)
-        );
-    }
 
     // --------------------------------------------------------------
     // Initialize the ROS 2 publisher for the statistics
@@ -74,7 +65,6 @@ void BpeMode::initialize() {
         Kp = node_->get_parameter("autopilot.BpeMode.gains.leader.Kp").as_double();
         Kv = node_->get_parameter("autopilot.BpeMode.gains.leader.Kv").as_double();
         Kr = node_->get_parameter("autopilot.BpeMode.gains.leader.Kr").as_double();
-
     } else {
 
         node_->declare_parameter<double>("autopilot.BpeMode.gains.followers.Kp", 2.0);
@@ -84,28 +74,45 @@ void BpeMode::initialize() {
         Kp = node_->get_parameter("autopilot.BpeMode.gains.followers.Kp").as_double();
         Kv = node_->get_parameter("autopilot.BpeMode.gains.followers.Kv").as_double();
         Kr = node_->get_parameter("autopilot.BpeMode.gains.followers.Kr").as_double();
-
     }
+
+    // --------------------------------------------------------------
+    // Initialize the trajectory parameters
+    // --------------------------------------------------------------
+    node_->declare_parameter<double>("autopilot.BpeMode.trajectory.z", -2.0);
+    node_->declare_parameter<double>("autopilot.BpeMode.trajectory.A_offset", 1.0);
+    node_->declare_parameter<double>("autopilot.BpeMode.trajectory.frequency", 0.1);
+
+    z_ = node_->get_parameter("autopilot.BpeMode.trajectory.z").as_double();
+    A_offset_ = node_->get_parameter("autopilot.BpeMode.trajectory.A_offset").as_double();
+    frequency_ = node_->get_parameter("autopilot.BpeMode.trajectory.frequency").as_double();
 
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kp: %f", Kp);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kv: %f", Kv);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kr: %f", Kr);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode sim: " << sim);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode leader_id: " << leader_id);
+    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory z: " << z_);
+    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory A offset: " << A_offset_);
+    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory frequency: " << frequency_);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode initialized");
 }
 
 bool BpeMode::enter() {
+
+    // Reset the time
+    t = 0;
     return true;
 }
 
 void BpeMode::update(double dt) {
+
+    // Update the current total time (used to get the desired bearing from the trajectory)
+    // (this works under the assumption that this mode is activated for all robots at the same time)
+    t += dt;
     
     // Get the current state of the vehicle
     update_vehicle_state();
-
-    // Update the total-time using dt if running in real-time
-    if (!sim) t += dt;
 
     // Get the desired trajectory for each agent
     update_desired_trajectory();
@@ -118,9 +125,10 @@ void BpeMode::update(double dt) {
 
     } else {
 
-        // Otherwise, compute the desired acceleration using the BPE algorithm
-        u = udes[drone_id-leader_id] - Kv * (V - vdes[drone_id-leader_id]);
+        // Compute the desired velocity error (for the trajectory to be executed) + feed-forward term
+        u = -Kv * (V - vdes[drone_id-leader_id]) + udes[drone_id-leader_id] ;
 
+        // For each vehicle that we measure the bearing
         for (size_t j = 0; j < n_agents; j++) {
             if (aij[drone_id-leader_id][j]) {
 
@@ -128,17 +136,17 @@ void BpeMode::update(double dt) {
                 pij = P_other[j] - P;
                 gij = pij.normalized();
 
-                // Get the desired bearing
+                // Get the desired relative position to the leader
                 pijd = pdes[j] - pdes[drone_id-leader_id];
 
-                // Compute the desired acceleration witht the extra consensus term
+                // Substract to the acceleration the a correction term in the tangent space of S2
                 u = u - Kp*(pijd - gij * gij.dot(pijd));
-            }   
+            }
         }  
     }
 
     // Compute the desired force to apply
-    TRde3 = mass*g*e3 - mass*u;
+    TRde3 = mass*9.81*e3 - mass*u;
 
     // Get the desired thrust along the desired Zb axis
     thrust = TRde3.norm();
@@ -200,16 +208,16 @@ void BpeMode::update_desired_trajectory() {
 
     // Get the desired trajectory for each agent
     double A;
-    double omega = M_PI * 2 / 10;
+    double omega = M_PI * 2 * frequency_;
 
     for (size_t i = 0; i < n_agents; i++) {
         
-        A = double(i+1);
+        A = double(i+A_offset_);
 
         // Compute the desired position
         pdes[i][0] = A*sin(omega*t - i*M_PI/2);
         pdes[i][1] = A*cos(omega*t - i*M_PI/2);
-        pdes[i][2] = -2.0;
+        pdes[i][2] = z_;
 
         // Compute the desired velocity
         vdes[i][0] =  omega*A*cos(omega*t - i*M_PI/2);
@@ -235,10 +243,6 @@ void BpeMode::target_state_callback(const nav_msgs::msg::Odometry::ConstSharedPt
     
     // Since in the simulation all the drones start at the same position, we add a small offset to the position between the vehicles
     if (sim) P_other[id][1] += id*3.0;
-}
-
-void BpeMode::gz_clock_callback(const rosgraph_msgs::msg::Clock::ConstSharedPtr msg) {
-    t = 1.0*msg->clock.sec + 1e-9*msg->clock.nanosec;
 }
 
 void BpeMode::update_vehicle_state() {
