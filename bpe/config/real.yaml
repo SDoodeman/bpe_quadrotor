@@ -4,7 +4,7 @@
     # Low-level configurations
     # ----------------------------------------------------------------------------------------------------------
     dynamics:
-      mass: 0.380 #0.410 #Kg
+      mass: 0.360 #0.410 #Kg
       thrust_curve:
         # Formula T(N) = a * arctan(b * input + c) + d   
         # with input = [0.0, 100.0]
@@ -104,9 +104,13 @@
             Kv: 4.0
             Kr: 3.0
           followers:
-            Kp: 2.0
+            Kp: 5.0
             Kv: 4.0
-            Kr: 10.0
+            Kr: 3.0
+        trajectory:
+          z: -1.5           # The height of the circles
+          A_offset: 0.40    # Circles amplitude offset
+          frequency: 0.1    # Frequency in Hz
       DisarmMode: 
         valid_transitions: ["ArmMode"]
         fallback: "DisarmMode"
@@ -128,7 +132,7 @@
         valid_transitions: ["DisarmMode", "ArmMode", "TakeoffMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode"]
         fallback: "HoldMode"
         on_finish: "DisarmMode"
-        land_speed: 0.2 # m/s
+        land_speed: 0.4 # m/s
         land_detected_treshold: 0.1 # m/s
         countdown_to_disarm: 3.0 # s
       HoldMode: 

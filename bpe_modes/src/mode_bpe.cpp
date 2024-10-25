@@ -212,7 +212,7 @@ void BpeMode::update_desired_trajectory() {
 
     for (size_t i = 0; i < n_agents; i++) {
         
-        A = double(i+A_offset_);
+        A = double((i+1)*A_offset_);
 
         // Compute the desired position
         pdes[i][0] = A*sin(omega*t - i*M_PI/2);

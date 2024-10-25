@@ -64,9 +64,9 @@ protected:
     // --------------------
     // Trajectory variables
     // --------------------
-    Eigen::Vector3d P{Eigen::Vector3d::Zero()};     // Position
-    Eigen::Vector3d V{Eigen::Vector3d::Zero()};     // Velocity
-    Eigen::Matrix3d R{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
+    Eigen::Vector3d P{Eigen::Vector3d::Zero()};      // Position
+    Eigen::Vector3d V{Eigen::Vector3d::Zero()};      // Velocity
+    Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};  // Attitude
     std::vector<Eigen::Vector3d> pdes{static_cast<size_t>(n_agents), Eigen::Vector3d::Zero()};
     std::vector<Eigen::Vector3d> vdes{static_cast<size_t>(n_agents), Eigen::Vector3d::Zero()};
     std::vector<Eigen::Vector3d> udes{static_cast<size_t>(n_agents), Eigen::Vector3d::Zero()};
