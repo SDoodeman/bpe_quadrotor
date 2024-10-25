@@ -100,13 +100,13 @@
         leader_id: 8
         gains:
           leader:
-            Kp: 5.26
-            Kv: 4.0
-            Kr: 3.0
+            Kp: 7.0
+            Kv: 5.0
+            Kr: 3.5
           followers:
-            Kp: 5.0
-            Kv: 4.0
-            Kr: 3.0
+            Kp: 7.0
+            Kv: 5.0
+            Kr: 3.5
         trajectory:
           z: -1.5           # The height of the circles
           A_offset: 0.40    # Circles amplitude offset
