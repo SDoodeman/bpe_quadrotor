@@ -27,6 +27,38 @@
     </DockSplitter>
    </Container>
   </Tab>
+  <Tab tab_name="XY with references" containers="1">
+   <Container>
+    <DockSplitter orientation="-" count="1" sizes="1">
+     <DockSplitter orientation="|" count="2" sizes="0.500324;0.499676">
+      <DockArea name="...">
+       <plot flip_y="false" flip_x="false" style="Lines" mode="XYPlot">
+        <range bottom="-2.962477" right="1.830773" top="1.824719" left="-1.984188"/>
+        <limitY/>
+        <curve curve_x="/drone8/desired_control_position/position[1]" color="#000000" name="/drone8/desired_control_position/position[[1];0]]" curve_y="/drone8/desired_control_position/position[0]"/>
+        <curve curve_x="/drone9/desired_control_position/position[1]" color="#000000" name="/drone9/desired_control_position/position[[1];0]]" curve_y="/drone9/desired_control_position/position[0]"/>
+        <curve curve_x="/drone10/desired_control_position/position[1]" color="#000000" name="/drone10/desired_control_position/position[[1];0]]" curve_y="/drone10/desired_control_position/position[0]"/>
+        <curve curve_x="/drone8/fmu/filter/state/pose/pose/position/y" color="#bcbd22" name="/drone8/fmu/filter/state/pose/pose/position/[y;x]" curve_y="/drone8/fmu/filter/state/pose/pose/position/x"/>
+        <curve curve_x="/drone9/fmu/filter/state/pose/pose/position/y" color="#1f77b4" name="/drone9/fmu/filter/state/pose/pose/position/[y;x]" curve_y="/drone9/fmu/filter/state/pose/pose/position/x"/>
+        <curve curve_x="/drone10/fmu/filter/state/pose/pose/position/y" color="#d62728" name="/drone10/fmu/filter/state/pose/pose/position/[y;x]" curve_y="/drone10/fmu/filter/state/pose/pose/position/x"/>
+       </plot>
+      </DockArea>
+      <DockArea name="...">
+       <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
+        <range bottom="-1.538644" right="84.976194" top="0.084416" left="0.000000"/>
+        <limitY/>
+        <curve color="#1ac938" name="/drone8/desired_control_position/position[2]"/>
+        <curve color="#1f77b4" name="/drone9/desired_control_position/position[2]"/>
+        <curve color="#17becf" name="/drone10/desired_control_position/position[2]"/>
+        <curve color="#9467bd" name="/drone8/fmu/filter/state/pose/pose/position/z"/>
+        <curve color="#ff7f0e" name="/drone9/fmu/filter/state/pose/pose/position/z"/>
+        <curve color="#d62728" name="/drone10/fmu/filter/state/pose/pose/position/z"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+    </DockSplitter>
+   </Container>
+  </Tab>
   <Tab tab_name="Drone 8" containers="1">
    <Container>
     <DockSplitter orientation="-" count="1" sizes="1">
@@ -342,7 +374,7 @@
     </DockSplitter>
    </Container>
   </Tab>
-  <currentTabIndex index="0"/>
+  <currentTabIndex index="1"/>
  </tabbed_widget>
  <use_relative_time_offset enabled="1"/>
  <!-- - - - - - - - - - - - - - - -->
