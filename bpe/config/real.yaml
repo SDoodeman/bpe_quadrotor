@@ -101,11 +101,11 @@
         gains:
           leader:
             Kp: 7.0
-            Kv: 5.0
+            Kv: 5.5
             Kr: 3.5
           followers:
             Kp: 7.0
-            Kv: 5.0
+            Kv: 5.5
             Kr: 3.5
         trajectory:
           z: -1.5           # The height of the circles
