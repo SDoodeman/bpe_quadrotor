@@ -104,10 +104,11 @@
             Kr: 8.0     # Atittude term
           followers:
             Kp: 2.5     # Proportional term of the relative bearing error
-            Kv: 2.0
-            Kr: 8.0
+            Kv: 2.0     # Derivative term to the trajectory (velocity feedback gain)
+            Kr: 8.0     # Atittude term
+            Ko: 2.0     # Collision avoidance gain
         trajectory:
-          z: -1.5          # The height of the circles
+          z: -3.5          # The height of the circles
           A_offset: 1.0    # Circles amplitude offset
           frequency: 0.1   # Frequency in Hz
       DisarmMode: 

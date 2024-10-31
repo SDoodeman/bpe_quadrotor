@@ -26,6 +26,9 @@ void BpeMode::initialize() {
     // Configure the adjacency matrix
     aij[1][0] = 1;
     aij[2][1] = 1;
+    aij[2][0] = 0;
+
+    r = 0.5; // Safety distance
 
     // --------------------------------------------------------------
     // Subscribe to the position of the other agents
@@ -59,8 +62,8 @@ void BpeMode::initialize() {
     // --------------------------------------------------------------
     if (drone_id == leader_id) {
         node_->declare_parameter<double>("autopilot.BpeMode.gains.leader.Kp", 2.0);
-        node_->declare_parameter<double>("autopilot.BpeMode.gains.leader.Kv", 0.5);
-        node_->declare_parameter<double>("autopilot.BpeMode.gains.leader.Kr", 10.0);
+        node_->declare_parameter<double>("autopilot.BpeMode.gains.leader.Kv", 0.5); // Above 5/6 is unstable
+        node_->declare_parameter<double>("autopilot.BpeMode.gains.leader.Kr", 10.0); // Above 10 is unstable
 
         Kp = node_->get_parameter("autopilot.BpeMode.gains.leader.Kp").as_double();
         Kv = node_->get_parameter("autopilot.BpeMode.gains.leader.Kv").as_double();
@@ -68,12 +71,14 @@ void BpeMode::initialize() {
     } else {
 
         node_->declare_parameter<double>("autopilot.BpeMode.gains.followers.Kp", 2.0);
-        node_->declare_parameter<double>("autopilot.BpeMode.gains.followers.Kv", 0.5);
-        node_->declare_parameter<double>("autopilot.BpeMode.gains.followers.Kr", 10.0);
+        node_->declare_parameter<double>("autopilot.BpeMode.gains.followers.Kv", 0.5); // Not allowed to get below 1
+        node_->declare_parameter<double>("autopilot.BpeMode.gains.followers.Kr", 10.0); // Above 10 is unstable
+        node_->declare_parameter<double>("autopilot.BpeMode.gains.followers.Ko", 1.0);
 
         Kp = node_->get_parameter("autopilot.BpeMode.gains.followers.Kp").as_double();
         Kv = node_->get_parameter("autopilot.BpeMode.gains.followers.Kv").as_double();
         Kr = node_->get_parameter("autopilot.BpeMode.gains.followers.Kr").as_double();
+        Ko = node_->get_parameter("autopilot.BpeMode.gains.followers.Ko").as_double();
     }
 
     // --------------------------------------------------------------
@@ -90,6 +95,7 @@ void BpeMode::initialize() {
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kp: %f", Kp);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kv: %f", Kv);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kr: %f", Kr);
+    RCLCPP_INFO(this->node_->get_logger(), "BpeMode Ko: %f", Ko);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode sim: " << sim);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode leader_id: " << leader_id);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory z: " << z_);
@@ -106,6 +112,7 @@ bool BpeMode::enter() {
 }
 
 void BpeMode::update(double dt) {
+    double fB;
 
     // Update the current total time (used to get the desired bearing from the trajectory)
     // (this works under the assumption that this mode is activated for all robots at the same time)
@@ -126,7 +133,7 @@ void BpeMode::update(double dt) {
     } else {
 
         // Compute the desired velocity error (for the trajectory to be executed) + feed-forward term
-        u = -Kv * (V - vdes[drone_id-leader_id]) + udes[drone_id-leader_id] ;
+        u = -Kv * (V - vdes[drone_id-leader_id]) + udes[drone_id-leader_id];
 
         // For each vehicle that we measure the bearing
         for (size_t j = 0; j < n_agents; j++) {
@@ -140,9 +147,13 @@ void BpeMode::update(double dt) {
                 pijd = pdes[j] - pdes[drone_id-leader_id];
 
                 // Substract to the acceleration the a correction term in the tangent space of S2
-                u = u - Kp*(pijd - gij * gij.dot(pijd));
+                u += - Kp*(pijd - gij * gij.dot(pijd));
+
+                // Collission avoidance term (p_ij is -e_i from the paper)
+                fB = gij.dot(V_other[j] - V) / (pij.norm() - r);
+                u += Ko*gij*fB;
             }
-        }  
+        }
     }
 
     // Compute the desired force to apply
@@ -240,6 +251,7 @@ void BpeMode::target_state_callback(const nav_msgs::msg::Odometry::ConstSharedPt
 
     // Update the position of the other targets (used later to compute the relative bearing measurements)
     P_other[id] = Eigen::Vector3d(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+    V_other[id] = Eigen::Vector3d(msg->twist.twist.linear.x, msg->twist.twist.linear.y, msg->twist.twist.linear.z);
     
     // Since in the simulation all the drones start at the same position, we add a small offset to the position between the vehicles
     if (sim) P_other[id][1] += id*3.0;

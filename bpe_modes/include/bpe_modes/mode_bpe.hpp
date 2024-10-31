@@ -34,11 +34,13 @@ protected:
     double Kp{1.0};
     double Kv{1.0};
     double Kr{1.0};
+    double Ko{1.0};
 
     // General parameters
     double mass;
     double thrust{0};
     double t{0};
+    double r{0};
     bool sim{true};
     int n_agents{3};
     int drone_id{1};
@@ -85,6 +87,7 @@ protected:
     Eigen::Vector3d attitude = Eigen::Vector3d::Zero();
     Eigen::Vector3d attitude_rate = Eigen::Vector3d::Zero();
     std::vector<Eigen::Vector3d> P_other{static_cast<size_t>(n_agents), Eigen::Vector3d::Zero()};
+    std::vector<Eigen::Vector3d> V_other{static_cast<size_t>(n_agents), Eigen::Vector3d::Zero()};
 
     // Control inputs to apply to the vehicle
     Eigen::Vector3d velocity_;

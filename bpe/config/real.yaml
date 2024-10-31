@@ -100,13 +100,14 @@
         leader_id: 8
         gains:
           leader:
-            Kp: 7.0
-            Kv: 5.5
-            Kr: 3.5
+            Kp: 7.0     # Proportional term to the trajectory
+            Kv: 5.5     # Derivative term to the trajectory
+            Kr: 3.5     # Atittude term
           followers:
-            Kp: 7.0
-            Kv: 5.5
-            Kr: 3.5
+            Kp: 7.0     # Proportional term of the relative bearing error
+            Kv: 5.5     # Derivative term to the trajectory (velocity feedback gain)
+            Kr: 3.5     # Atittude term
+            Ko: 1.0     # Collision avoidance gain
         trajectory:
           z: -1.5           # The height of the circles
           A_offset: 0.40    # Circles amplitude offset
