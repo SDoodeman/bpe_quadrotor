@@ -55,10 +55,10 @@ def main(args=None):
 
     drones = []
     n_drones = 3
-    leader_id = 8
+    first_drone_id = 8
 
     for i in range(n_drones):
-        drones.append(Drone(i+leader_id))
+        drones.append(Drone(i+first_drone_id))
 
     for i in range(n_drones):
         drones[i].set_autopilot_mode('LandMode')

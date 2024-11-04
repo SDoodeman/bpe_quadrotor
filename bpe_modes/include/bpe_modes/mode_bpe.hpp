@@ -42,17 +42,14 @@ protected:
     double t{0};
     double r{0};
     bool sim{true};
-    int n_agents{3};
     int drone_id{1};
 
-    int aij[3][3] = {
-        {0, 0, 0},
-        {0, 0, 0},
-        {0, 0, 0},
-    };
+    int n_agents{4};
+    int aij[4][4]{0};
 
     // Defines the id of the leader vehicle (by default 1 and the other vehicles follow)
-    int leader_id{1};
+    int first_drone_id{1};
+    int leader_id{0};
     int N_following{0};
 
     // Trajectory parameters

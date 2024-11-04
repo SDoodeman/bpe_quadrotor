@@ -20,13 +20,18 @@ void BpeMode::initialize() {
     // --------------------------------------------------------------
     // Get the ID of the leader vehicle
     // --------------------------------------------------------------
-    node_->declare_parameter<int>("autopilot.BpeMode.leader_id", 1);
-    leader_id = node_->get_parameter("autopilot.BpeMode.leader_id").as_int();
+    node_->declare_parameter<int>("autopilot.BpeMode.first_drone_id", 1);
+    first_drone_id = node_->get_parameter("autopilot.BpeMode.first_drone_id").as_int();
+    // leader_id = first_drone_id;  // In case a real drone is the leader
+    leader_id = first_drone_id - 1; // Virtual leader
     
     // Configure the adjacency matrix
     aij[1][0] = 1;
     aij[2][1] = 1;
     aij[2][0] = 1;
+    aij[3][2] = 1;
+    aij[3][1] = 1;
+    aij[3][0] = 1;
 
     for (size_t j = 0; j < n_agents; j++) {
         if (aij[drone_id-leader_id][j]) {
@@ -37,9 +42,9 @@ void BpeMode::initialize() {
     r = 0.5; // Safety distance
 
     // --------------------------------------------------------------
-    // Subscribe to the position of the other agents
+    // Subscribe to the position of the other real agents
     // --------------------------------------------------------------
-    for (size_t i = 0; i < n_agents; i++) {
+    for (size_t i = first_drone_id-leader_id; i < n_agents; i++) {
         if (aij[drone_id-leader_id][i] || (drone_id-leader_id == i)) {
             target_subs_.push_back(node_->create_subscription<nav_msgs::msg::Odometry>(
                 "/drone" + std::to_string(i+leader_id) + "/fmu/filter/state",
@@ -103,7 +108,7 @@ void BpeMode::initialize() {
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kr: %f", Kr);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Ko: %f", Ko);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode sim: " << sim);
-    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode leader_id: " << leader_id);
+    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode first_drone_id: " << first_drone_id);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory z: " << z_);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory A offset: " << A_offset_);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory frequency: " << frequency_);
@@ -158,15 +163,22 @@ void BpeMode::update(double dt) {
                 // Compute the desired velocity error (for the trajectory to be executed)
                 u += -Kv / N_following * ((V - V_other[j]) - (vdes[drone_id-leader_id] - vdes[j]));
 
-                // Collission avoidance term (p_ij is -e_i from the paper)
-                fB = gij.dot(V_other[j] - V) / (pij.norm() - r);
-                u += Ko*gij*fB;
+                // Collission avoidance term (ignore if other drone is virtual) (p_ij is -e_i from the paper)
+                if (j < first_drone_id - leader_id) {
+                    fB = gij.dot(V_other[j] - V) / (pij.norm() - r);
+                    u += Ko*gij*fB;
+                }
             }
         }
     }
 
     // Compute the desired force to apply
     TRde3 = mass*9.81*e3 - mass*u;
+
+    // Prevent flipping the drone over
+    // if (TRde3[2] < 0.0) {
+    //     TRde3[2] = 0.0;
+    // }
 
     // Get the desired thrust along the desired Zb axis
     thrust = TRde3.norm();
@@ -232,7 +244,12 @@ void BpeMode::update_desired_trajectory() {
 
     for (size_t i = 0; i < n_agents; i++) {
         
-        A = double((i+1)*A_offset_);
+        A = double((i)*A_offset_);
+
+        // Give virtual agents an amplitude of 10
+        if (i < first_drone_id-leader_id) {
+                A = 10;
+        }
 
         // Compute the desired position
         pdes[i][0] = A*sin(omega*t - i*M_PI/2);
@@ -254,6 +271,12 @@ void BpeMode::update_desired_trajectory() {
         jdes[i][1] =  std::pow(omega,3)*A*sin(omega*t - i*M_PI/2);
         jdes[i][2] = 0.0;
     }
+
+    // In case of a virtual leader
+    for (size_t i = 0; i < first_drone_id - leader_id; i++) {
+            P_other[i] = pdes[i];
+            V_other[i] = vdes[i];
+    }
 }
 
 void BpeMode::target_state_callback(const nav_msgs::msg::Odometry::ConstSharedPtr msg, int id) {
@@ -263,7 +286,7 @@ void BpeMode::target_state_callback(const nav_msgs::msg::Odometry::ConstSharedPt
     V_other[id] = Eigen::Vector3d(msg->twist.twist.linear.x, msg->twist.twist.linear.y, msg->twist.twist.linear.z);
     
     // Since in the simulation all the drones start at the same position, we add a small offset to the position between the vehicles
-    if (sim) P_other[id][1] += id*3.0;
+    if (sim) P_other[id][1] += (id + leader_id - first_drone_id)*3.0;
 }
 
 void BpeMode::update_vehicle_state() {
@@ -275,7 +298,7 @@ void BpeMode::update_vehicle_state() {
     P = state.position;
 
     // Since in the simulation all the drones start at the same position, we add a small offset to the position between the vehicles
-    if (sim) P[1] += (drone_id-leader_id)*3.0;
+    if (sim) P[1] += (drone_id-first_drone_id)*3.0;
 
     // Get the current velocity
     V = state.velocity;

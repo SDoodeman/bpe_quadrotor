@@ -97,7 +97,7 @@
         fallback: "HoldMode"
         on_finish: "HoldMode"
         simulation: False
-        leader_id: 8
+        first_drone_id: 8
         gains:
           leader:
             Kp: 7.0     # Proportional term to the trajectory
