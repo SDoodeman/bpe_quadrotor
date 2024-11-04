@@ -174,24 +174,23 @@ void BpeMode::update(double dt) {
     // Get the desired Zb axis
     Rde3 = TRde3 / thrust;
 
-    // Compute the desired attitude-rate
+    // Compute the desired attitude-rate in case of attitude-rate control
     attitude_rate = R.transpose() * (-Kr * Rde3.cross(R.col(2)) - (mass / thrust) * Rde3.cross((Eigen::Matrix3d::Identity() - Rde3 * Rde3.transpose()) * jdes[drone_id-leader_id]));
 
     // Convert the desired attitude-rate to degrees
     attitude_rate = Pegasus::Rotations::rad_to_deg(attitude_rate);
 
-    this->controller_->set_attitude_rate(attitude_rate, thrust, dt);
-
-    // ---------------------------------------------------------------
-    // Compute the desired references for statistics and plotting
-    // ---------------------------------------------------------------
-
+    // Compute the desired attitude in case of attitude control
     attitude[0] = Pegasus::Rotations::rad_to_deg(atan2(-Rde3[1], Rde3[2]));
     attitude[1] = Pegasus::Rotations::rad_to_deg(asin(Rde3[0]));
     attitude[2] = Pegasus::Rotations::rad_to_deg(0);
 
-    // this->controller_->set_attitude(attitude, thrust, dt);
+    // this->controller_->set_attitude_rate(attitude_rate, thrust, dt);
+    this->controller_->set_attitude(attitude, thrust, dt);
 
+    // ---------------------------------------------------------------
+    // Send desired references for statistics and plotting
+    // ---------------------------------------------------------------
     // Set the attitude control message
     desired_attitude_msg_.attitude[0] = attitude[0];
     desired_attitude_msg_.attitude[1] = attitude[1];
