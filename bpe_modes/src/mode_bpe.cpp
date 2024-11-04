@@ -180,10 +180,11 @@ void BpeMode::update(double dt) {
     // Convert the desired attitude-rate to degrees
     attitude_rate = Pegasus::Rotations::rad_to_deg(attitude_rate);
 
-    // Compute the desired attitude in case of attitude control
-    attitude[0] = Pegasus::Rotations::rad_to_deg(atan2(-Rde3[1], Rde3[2]));
-    attitude[1] = Pegasus::Rotations::rad_to_deg(asin(Rde3[0]));
-    attitude[2] = Pegasus::Rotations::rad_to_deg(0);
+    // Compute attitude according to Z-Y-X convention
+    double yaw_des = -2*M_PI/frequency_*t;
+    attitude[0] = Pegasus::Rotations::rad_to_deg(asin(Rde3[0]*sin(yaw_des)-Rde3[1]*cos(yaw_des)));
+    attitude[1] = Pegasus::Rotations::rad_to_deg(atan2(Rde3[0]*cos(yaw_des)+Rde3[1]*sin(yaw_des), Rde3[2]));
+    attitude[2] = Pegasus::Rotations::rad_to_deg(yaw_des);
 
     // this->controller_->set_attitude_rate(attitude_rate, thrust, dt);
     this->controller_->set_attitude(attitude, thrust, dt);
