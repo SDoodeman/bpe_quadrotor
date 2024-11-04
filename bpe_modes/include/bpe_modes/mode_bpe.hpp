@@ -53,6 +53,7 @@ protected:
 
     // Defines the id of the leader vehicle (by default 1 and the other vehicles follow)
     int leader_id{1};
+    int N_following{0};
 
     // Trajectory parameters
     double A_offset_;

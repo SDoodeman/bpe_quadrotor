@@ -104,7 +104,7 @@
             Kr: 8.0     # Atittude term
           followers:
             Kp: 2.5     # Proportional term of the relative bearing error
-            Kv: 2.0     # Derivative term to the trajectory (velocity feedback gain)
+            Kv: 5.0     # Derivative term to the trajectory (velocity feedback gain)
             Kr: 8.0     # Atittude term
             Ko: 2.0     # Collision avoidance gain
         trajectory:

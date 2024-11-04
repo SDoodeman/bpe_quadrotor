@@ -26,7 +26,13 @@ void BpeMode::initialize() {
     // Configure the adjacency matrix
     aij[1][0] = 1;
     aij[2][1] = 1;
-    aij[2][0] = 0;
+    aij[2][0] = 1;
+
+    for (size_t j = 0; j < n_agents; j++) {
+        if (aij[drone_id-leader_id][j]) {
+            N_following += 1;
+        }
+    }
 
     r = 0.5; // Safety distance
 
@@ -34,7 +40,7 @@ void BpeMode::initialize() {
     // Subscribe to the position of the other agents
     // --------------------------------------------------------------
     for (size_t i = 0; i < n_agents; i++) {
-        if (aij[drone_id-leader_id][i]) {
+        if (aij[drone_id-leader_id][i] || (drone_id-leader_id == i)) {
             target_subs_.push_back(node_->create_subscription<nav_msgs::msg::Odometry>(
                 "/drone" + std::to_string(i+leader_id) + "/fmu/filter/state",
                 rclcpp::SensorDataQoS(),
@@ -132,8 +138,8 @@ void BpeMode::update(double dt) {
 
     } else {
 
-        // Compute the desired velocity error (for the trajectory to be executed) + feed-forward term
-        u = -Kv * (V - vdes[drone_id-leader_id]) + udes[drone_id-leader_id];
+        // Compute the feed-forward term
+        u = udes[drone_id-leader_id];
 
         // For each vehicle that we measure the bearing
         for (size_t j = 0; j < n_agents; j++) {
@@ -148,6 +154,9 @@ void BpeMode::update(double dt) {
 
                 // Substract to the acceleration the a correction term in the tangent space of S2
                 u += - Kp*(pijd - gij * gij.dot(pijd));
+
+                // Compute the desired velocity error (for the trajectory to be executed)
+                u += -Kv / N_following * ((V - V_other[j]) - (vdes[drone_id-leader_id] - vdes[j]));
 
                 // Collission avoidance term (p_ij is -e_i from the paper)
                 fB = gij.dot(V_other[j] - V) / (pij.norm() - r);
