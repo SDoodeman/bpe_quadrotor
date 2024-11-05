@@ -95,11 +95,13 @@ void BpeMode::initialize() {
     // --------------------------------------------------------------
     // Initialize the trajectory parameters
     // --------------------------------------------------------------
-    node_->declare_parameter<double>("autopilot.BpeMode.trajectory.z", -2.0);
+    node_->declare_parameter<double>("autopilot.BpeMode.trajectory.z_min", -2.0);
+    node_->declare_parameter<double>("autopilot.BpeMode.trajectory.z_max", -4.0);
     node_->declare_parameter<double>("autopilot.BpeMode.trajectory.A_offset", 1.0);
     node_->declare_parameter<double>("autopilot.BpeMode.trajectory.frequency", 0.1);
 
-    z_ = node_->get_parameter("autopilot.BpeMode.trajectory.z").as_double();
+    z_min = node_->get_parameter("autopilot.BpeMode.trajectory.z_min").as_double();
+    z_max = node_->get_parameter("autopilot.BpeMode.trajectory.z_max").as_double();
     A_offset_ = node_->get_parameter("autopilot.BpeMode.trajectory.A_offset").as_double();
     frequency_ = node_->get_parameter("autopilot.BpeMode.trajectory.frequency").as_double();
 
@@ -109,7 +111,8 @@ void BpeMode::initialize() {
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Ko: %f", Ko);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode sim: " << sim);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode first_drone_id: " << first_drone_id);
-    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory z: " << z_);
+    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory z min: " << z_min);
+    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory z max: " << z_max);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory A offset: " << A_offset_);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory frequency: " << frequency_);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode initialized");
@@ -239,38 +242,116 @@ bool BpeMode::exit() {
 void BpeMode::update_desired_trajectory() {
 
     // Get the desired trajectory for each agent
-    double A;
+    double A, Adot, z, zdot;
     double omega = M_PI * 2 * frequency_;
+    double t1{30};
+    double t2{80};
+    double t3{130};
 
     for (size_t i = 0; i < n_agents; i++) {
-        
-        A = double((i)*A_offset_);
+
+        // This trajectory will start with wide circles (i*A_offset_) at a height of z_min.
+        // From t=t1 to t=t2, the drones will start to move up and reduce the circle radius,
+        //   which is at its smallest at t2 (half of the original), at which the height is
+        //   in between z_min and z_max.
+        // From t=t2 to t=t3, the drones continue to move up, but increase the circle radius,
+        //   until the circles are at (i*A_offset_) again, at a height of z_max at t3.
+        // After t3, the circles will stay at (i*A_offset_) at a height of z_max.
+
+        /*
+                   z_max  +              o- - - (z)
+                          |             /
+            (i*A_offset_) + - - -o     / o- - - (A)
+                          |       \   / /
+                          |        \ o /
+                          |         \ / 
+        0.5*(i*A_offset_) +        / o
+                          |       /  
+                    z_min + - - -o
+                          +======|===|===|===========
+                          t0     t1  t2  t3
+        */                                   
 
         // Give virtual agents an amplitude of 10
         if (i < first_drone_id-leader_id) {
                 A = 10;
+                Adot = 0;
+                z = (z_min + z_max) / 2;
+                zdot = 0;
+        } else {
+            if (t < t1) {
+                A = double(i)*A_offset_;
+                Adot = 0;
+                z = z_min;
+                zdot = 0;
+            } else if (t1 < t && t < t2) {
+                A = double(i)*A_offset_*(1 - 0.5*(t - t1) / (t2 - t1));
+                Adot = -double(i)*A_offset_*0.5/(t2 - t1);
+                z = z_min + (z_max - z_min) / 2 * (t - t1) / (t2 - t1);
+                zdot = (z_max - z_min) / 2 / (t2 - t1);
+            } else if (t2 < t && t < t3) {
+                A = double(i)*A_offset_*(0.5 + 0.5*(t - t2) / (t3 - t2));
+                Adot = double(i)*A_offset_*0.5/(t3 - t2);
+                z = (z_max + z_min) / 2 + (z_max - z_min) / 2 * (t - t2) / (t3 - t2);
+                zdot = (z_max - z_min) / 2 / (t3 - t2);
+            } else {
+                A = double(i)*A_offset_;
+                Adot = 0;
+                z = z_max;
+                zdot = 0;
+            }
         }
 
         // Compute the desired position
         pdes[i][0] = A*sin(omega*t - i*M_PI/2);
         pdes[i][1] = A*cos(omega*t - i*M_PI/2);
-        pdes[i][2] = z_;
+        pdes[i][2] = z;
 
         // Compute the desired velocity
-        vdes[i][0] =  omega*A*cos(omega*t - i*M_PI/2);
-        vdes[i][1] = -omega*A*sin(omega*t - i*M_PI/2);
-        vdes[i][2] = 0.0;
+        vdes[i][0] =  omega*A*cos(omega*t - i*M_PI/2) + Adot*sin(omega*t - i*M_PI/2);
+        vdes[i][1] = -omega*A*sin(omega*t - i*M_PI/2) + Adot*cos(omega*t - i*M_PI/2);
+        vdes[i][2] = zdot;
 
         // Compute the desired acceleration
-        udes[i][0] = -std::pow(omega,2)*A*sin(omega*t - i*M_PI/2);
-        udes[i][1] = -std::pow(omega,2)*A*cos(omega*t - i*M_PI/2);
+        udes[i][0] = -std::pow(omega,2)*A*sin(omega*t - i*M_PI/2) + 2*omega*Adot*cos(omega*t - i*M_PI/2);
+        udes[i][1] = -std::pow(omega,2)*A*cos(omega*t - i*M_PI/2) - 2*omega*Adot*sin(omega*t - i*M_PI/2);
         udes[i][2] = 0.0;
         
         // Compute the desired jerk
-        jdes[i][0] = -std::pow(omega,3)*A*cos(omega*t - i*M_PI/2);
-        jdes[i][1] =  std::pow(omega,3)*A*sin(omega*t - i*M_PI/2);
+        jdes[i][0] = -std::pow(omega,3)*A*cos(omega*t - i*M_PI/2) - 3*std::pow(omega,2)*Adot*sin(omega*t - i*M_PI/2);
+        jdes[i][1] =  std::pow(omega,3)*A*sin(omega*t - i*M_PI/2) - 3*std::pow(omega,2)*Adot*cos(omega*t - i*M_PI/2);
         jdes[i][2] = 0.0;
     }
+
+    // for (size_t i = 0; i < n_agents; i++) {
+        
+    //     A = double((i)*A_offset_);
+
+    //     // Give virtual agents an amplitude of 10
+    //     if (i < first_drone_id-leader_id) {
+    //             A = 10;
+    //     }
+
+    //     // Compute the desired position
+    //     pdes[i][0] = A*sin(omega*t - i*M_PI/2);
+    //     pdes[i][1] = A*cos(omega*t - i*M_PI/2);
+    //     pdes[i][2] = (z_min + z_max) / 2;
+
+    //     // Compute the desired velocity
+    //     vdes[i][0] =  omega*A*cos(omega*t - i*M_PI/2);
+    //     vdes[i][1] = -omega*A*sin(omega*t - i*M_PI/2);
+    //     vdes[i][2] = 0.0;
+
+    //     // Compute the desired acceleration
+    //     udes[i][0] = -std::pow(omega,2)*A*sin(omega*t - i*M_PI/2);
+    //     udes[i][1] = -std::pow(omega,2)*A*cos(omega*t - i*M_PI/2);
+    //     udes[i][2] = 0.0;
+        
+    //     // Compute the desired jerk
+    //     jdes[i][0] = -std::pow(omega,3)*A*cos(omega*t - i*M_PI/2);
+    //     jdes[i][1] =  std::pow(omega,3)*A*sin(omega*t - i*M_PI/2);
+    //     jdes[i][2] = 0.0;
+    // }
 
     // In case of a virtual leader
     for (size_t i = 0; i < first_drone_id - leader_id; i++) {

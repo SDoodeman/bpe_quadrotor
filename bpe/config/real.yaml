@@ -109,7 +109,8 @@
             Kr: 3.5     # Atittude term
             Ko: 1.0     # Collision avoidance gain
         trajectory:
-          z: -1.5           # The height of the circles
+          z_min: -1.0       # The height of the circles
+          z_max: -3.0       # The height of the circles
           A_offset: 0.40    # Circles amplitude offset
           frequency: 0.1    # Frequency in Hz
       DisarmMode: 

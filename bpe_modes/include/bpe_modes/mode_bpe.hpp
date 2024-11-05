@@ -55,7 +55,7 @@ protected:
     // Trajectory parameters
     double A_offset_;
     double frequency_;
-    double z_;
+    double z_min, z_max;
 
     // Subscribers vector for the position of each drone
     std::vector<rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr> target_subs_;
