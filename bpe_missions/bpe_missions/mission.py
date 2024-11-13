@@ -103,14 +103,16 @@ def main(args=None):
     # Wait for takeoff
     time.sleep(7)
 
+    A = 0.60
+
     # Set the waypoints for the drones
-    drones[0].set_waypoint( 0.0,  1.0, -1.5, 0.0)
+    drones[0].set_waypoint(-A,  0.0, -0.5, 0.0)
     drones[0].set_autopilot_mode('WaypointMode')
 
-    drones[1].set_waypoint(-1.0,  0.0, -1.5, 0.0)
+    drones[1].set_waypoint(0.0,  -A, -0.5, 0.0)
     drones[1].set_autopilot_mode('WaypointMode')
     
-    drones[2].set_waypoint( 0.0, -1.0, -1.5, 0.0)
+    drones[2].set_waypoint(A, 0.0, -0.5, 0.0)
     drones[2].set_autopilot_mode('WaypointMode')
 
     time.sleep(6)
@@ -120,7 +122,7 @@ def main(args=None):
         drones[i].set_autopilot_mode('BpeMode')
 
     # Land the drone
-    time.sleep(60)
+    time.sleep(150)
     for i in range(n_drones):
         drones[i].set_autopilot_mode('LandMode')
 

@@ -4,7 +4,7 @@
     # Low-level configurations
     # ----------------------------------------------------------------------------------------------------------
     dynamics:
-      mass: 0.360 #0.410 #Kg
+      mass: 0.410 #0.410 #Kg
       thrust_curve:
         # Formula T(N) = a * arctan(b * input + c) + d   
         # with input = [0.0, 100.0]
@@ -20,7 +20,7 @@
       # ----------------------------------------------------------------------------------------------------------
       # Definition of the controller that will perform the tracking of references of the different operation modes
       # ----------------------------------------------------------------------------------------------------------
-      controller: "MellingerController"
+      controller: "PIDController"
       # Configurations needed by the PX4 controller
       OnboardController:
         publishers:
@@ -37,7 +37,7 @@
           pid_debug_topic: "autopilot/statistics/pid"
         # Gains for position PIDs on [x, y, z]
         gains:
-          kp: [5.0, 5.0, 3.3]               # Proportional gain
+          kp: [5.0, 5.0, 3.6]               # Proportional gain
           kd: [4.0, 4.0, 5.0]               # Derivative gain
           ki: [0.10, 0.10, 0.25]            # Integral gain
           min_output: [-20.0, -20.0, -20.0] # Minimum output of each PID
@@ -104,15 +104,17 @@
             Kv: 5.5     # Derivative term to the trajectory
             Kr: 3.5     # Atittude term
           followers:
-            Kp: 7.0     # Proportional term of the relative bearing error
-            Kv: 5.5     # Derivative term to the trajectory (velocity feedback gain)
+            Kp: 4.5     # Proportional term of the relative bearing error
+            Kv: 3.0     # Derivative term to the trajectory (velocity feedback gain)
             Kr: 3.5     # Atittude term
-            Ko: 1.0     # Collision avoidance gain
+            Ko: 1.5     # Collision avoidance gain
         trajectory:
-          z_min: -1.0       # The height of the circles
-          z_max: -3.0       # The height of the circles
-          A_offset: 0.40    # Circles amplitude offset
+          z_min: -0.5       # The height of the circles
+          z_max: -2.0       # The height of the circles
+          A_offset: 0.55    # Circles amplitude offset
           frequency: 0.1    # Frequency in Hz
+        avoidance:
+          r: 0.5
       DisarmMode: 
         valid_transitions: ["ArmMode"]
         fallback: "DisarmMode"

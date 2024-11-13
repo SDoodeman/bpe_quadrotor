@@ -39,7 +39,7 @@ void BpeMode::initialize() {
         }
     }
 
-    r = 0.5; // Safety distance
+    //r = 0.5; // Safety distance
 
     // --------------------------------------------------------------
     // Subscribe to the position of the other real agents
@@ -99,7 +99,9 @@ void BpeMode::initialize() {
     node_->declare_parameter<double>("autopilot.BpeMode.trajectory.z_max", -4.0);
     node_->declare_parameter<double>("autopilot.BpeMode.trajectory.A_offset", 1.0);
     node_->declare_parameter<double>("autopilot.BpeMode.trajectory.frequency", 0.1);
+    node_->declare_parameter<double>("autopilot.BpeMode.avoidance.r", 0.1);
 
+    r = node_->get_parameter("autopilot.BpeMode.avoidance.r").as_double();
     z_min = node_->get_parameter("autopilot.BpeMode.trajectory.z_min").as_double();
     z_max = node_->get_parameter("autopilot.BpeMode.trajectory.z_max").as_double();
     A_offset_ = node_->get_parameter("autopilot.BpeMode.trajectory.A_offset").as_double();
@@ -248,6 +250,10 @@ void BpeMode::update_desired_trajectory() {
     double t2{80};
     double t3{130};
 
+    //double alpha = 0.15;
+
+    double A_min = 0.40;
+
     for (size_t i = 0; i < n_agents; i++) {
 
         // This trajectory will start with wide circles (i*A_offset_) at a height of z_min.
@@ -285,13 +291,17 @@ void BpeMode::update_desired_trajectory() {
                 z = z_min;
                 zdot = 0;
             } else if (t1 < t && t < t2) {
-                A = double(i)*A_offset_*(1 - 0.5*(t - t1) / (t2 - t1));
-                Adot = -double(i)*A_offset_*0.5/(t2 - t1);
+                //A = double(i)*A_offset_*(1 - alpha*(t - t1) / (t2 - t1));
+                //Adot = -double(i)*A_offset_*alpha/(t2 - t1);
+                A = double(i)*A_offset_ + ((A_min*double(i) - double(i)*A_offset_)*(t-t1)/(t2-t1));
+                Adot = (A_min*double(i) - double(i)*A_offset_)/(t2-t1);
                 z = z_min + (z_max - z_min) / 2 * (t - t1) / (t2 - t1);
                 zdot = (z_max - z_min) / 2 / (t2 - t1);
             } else if (t2 < t && t < t3) {
-                A = double(i)*A_offset_*(0.5 + 0.5*(t - t2) / (t3 - t2));
-                Adot = double(i)*A_offset_*0.5/(t3 - t2);
+                // A = double(i)*A_offset_*(alpha + alpha*(t - t2) / (t3 - t2));
+                // Adot = double(i)*A_offset_*alpha/(t3 - t2);
+                A = double(i)*A_min + ((double(i)*A_offset_ - A_min*double(i))*(t-t2)/(t3-t2));
+                Adot = (double(i)*A_offset_ - A_min*double(i))/(t3-t2);
                 z = (z_max + z_min) / 2 + (z_max - z_min) / 2 * (t - t2) / (t3 - t2);
                 zdot = (z_max - z_min) / 2 / (t3 - t2);
             } else {

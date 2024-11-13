@@ -20,7 +20,7 @@
       # ----------------------------------------------------------------------------------------------------------
       # Definition of the controller that will perform the tracking of references of the different operation modes
       # ----------------------------------------------------------------------------------------------------------
-      controller: "MellingerController"
+      controller: "PIDController"
       # Configurations needed by the PX4 controller
       OnboardController:
         publishers:
@@ -111,7 +111,9 @@
           z_min: -1.5      # The height of the circles
           z_max: -3.0      # The height of the circles
           A_offset: 1.0    # Circles amplitude offset
-          frequency: 0.1   # Frequency in Hz
+          frequency: 0.08   # Frequency in Hz
+        avoidance:
+          r: 0.5
       DisarmMode: 
         valid_transitions: ["ArmMode"]
         fallback: "DisarmMode"
