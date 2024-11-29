@@ -114,7 +114,7 @@
           A_offset: 0.55    # Circles amplitude offset
           frequency: 0.1    # Frequency in Hz
         avoidance:
-          r: 0.5
+          r: 0.25           # Have less effect 
       DisarmMode: 
         valid_transitions: ["ArmMode"]
         fallback: "DisarmMode"
