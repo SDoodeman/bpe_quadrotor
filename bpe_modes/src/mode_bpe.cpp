@@ -39,8 +39,6 @@ void BpeMode::initialize() {
         }
     }
 
-    //r = 0.5; // Safety distance
-
     // --------------------------------------------------------------
     // Subscribe to the position of the other real agents
     // --------------------------------------------------------------
@@ -169,7 +167,7 @@ void BpeMode::update(double dt) {
                 u += -Kv / N_following * ((V - V_other[j]) - (vdes[drone_id-leader_id] - vdes[j]));
 
                 // Collission avoidance term (ignore if other drone is virtual) (p_ij is -e_i from the paper)
-                if (j < first_drone_id - leader_id) {
+                if (j >= first_drone_id - leader_id) {
                     fB = gij.dot(V_other[j] - V) / (pij.norm() - r);
                     u += Ko*gij*fB;
                 }
@@ -180,10 +178,10 @@ void BpeMode::update(double dt) {
     // Compute the desired force to apply
     TRde3 = mass*9.81*e3 - mass*u;
 
-    // Prevent flipping the drone over
-    // if (TRde3[2] < 0.0) {
-    //     TRde3[2] = 0.0;
-    // }
+    // Prevent flipping of the drone
+    if (TRde3[2] < 0.0) {
+        TRde3[2] = 0.0;
+    }
 
     // Get the desired thrust along the desired Zb axis
     thrust = TRde3.norm();
