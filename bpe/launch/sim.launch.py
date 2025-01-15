@@ -21,7 +21,7 @@ def generate_launch_description():
             }.items())
     
     iris_launch_file = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris.launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris_small.launch.py')),
         launch_arguments={  # ENU coordinates
             'x':  '0.0',
             'y':  '0.0',
@@ -31,9 +31,9 @@ def generate_launch_description():
         }.items())
 
     iris2_launch_file = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris.launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris_small.launch.py')),
         launch_arguments={  # ENU coordinates
-            'x':  '3.0',
+            'x':  '1.0',
             'y':  '0.0',
             'z':  '0.0',
             'launch_pegasus': 'false',
@@ -41,9 +41,9 @@ def generate_launch_description():
         }.items())
 
     iris3_launch_file = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris.launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris_small.launch.py')),
         launch_arguments={  # ENU coordinates
-            'x':  '6.0',
+            'x':  '2.0',
             'y':  '0.0',
             'z':  '0.0',
             'launch_pegasus': 'false',
@@ -60,6 +60,36 @@ def generate_launch_description():
         default_value=os.path.join(get_package_share_directory('bpe'), 'config', 'simulation.yaml'),
         description='The directory where the drone parameters such as mass, thrust curve, etc. are defined')
     
+    # # Call the mocap emulator launch file
+    mocap_emulator1_launch_file = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mocap_emulator'), 'launch/mocap_emulator.launch.py')),
+        # Define costume launch arguments/parameters used 
+        launch_arguments={
+            'vehicle_id': '1',
+            'namespace': 'drone',
+        }.items(),
+    )
+
+    # # Call the mocap emulator launch file
+    mocap_emulator2_launch_file = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mocap_emulator'), 'launch/mocap_emulator.launch.py')),
+        # Define costume launch arguments/parameters used 
+        launch_arguments={
+            'vehicle_id': '2',
+            'namespace': 'drone',
+        }.items(),
+    )
+
+    # # Call the mocap emulator launch file
+    mocap_emulator3_launch_file = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mocap_emulator'), 'launch/mocap_emulator.launch.py')),
+        # Define costume launch arguments/parameters used 
+        launch_arguments={
+            'vehicle_id': '3',
+            'namespace': 'drone',
+        }.items(),
+    )
+
     # Call MAVLINK interface package launch file 
     mavlink_interface_launch_file = IncludeLaunchDescription(
         # Grab the launch file for the mavlink interface
@@ -146,6 +176,9 @@ def generate_launch_description():
         iris3_launch_file,
         # Launch files for the control system
         drone_params_file_arg,
+        mocap_emulator1_launch_file,
+        mocap_emulator2_launch_file,
+        mocap_emulator3_launch_file,
         mavlink_interface_launch_file,
         mavlink2_interface_launch_file,
         mavlink3_interface_launch_file,
