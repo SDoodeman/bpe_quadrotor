@@ -5,4 +5,8 @@
       <description>Mode for performing bearing persistence of excitation formation control experiments.</description>
   </class>
 
+  <class type="autopilot::BpeMode2" base_class_type="autopilot::Mode">
+      <description>Mode for performing bearing persistence of excitation formation control experiments.</description>
+  </class>
+
 </library>

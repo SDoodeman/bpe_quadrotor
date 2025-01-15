@@ -96,7 +96,6 @@
         valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
         fallback: "HoldMode"
         on_finish: "HoldMode"
-        simulation: False
         first_drone_id: 8
         gains:
           leader:

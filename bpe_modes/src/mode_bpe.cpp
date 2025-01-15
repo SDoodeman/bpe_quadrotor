@@ -10,10 +10,6 @@ void BpeMode::initialize() {
     // Getting the drone ID and subscribing to the state of the other drones on the network
     drone_id = get_vehicle_constants().id;
 
-    // Load the parameter that checks if the experiment is simulation or real time
-    node_->declare_parameter<bool>("autopilot.BpeMode.simulation", true);
-    sim = node_->get_parameter("autopilot.BpeMode.simulation").as_bool();
-
     // Get the mass of the vehicle
     mass = get_vehicle_constants().mass;
 
@@ -109,7 +105,6 @@ void BpeMode::initialize() {
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kv: %f", Kv);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Kr: %f", Kr);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode Ko: %f", Ko);
-    RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode sim: " << sim);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode first_drone_id: " << first_drone_id);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory z min: " << z_min);
     RCLCPP_INFO_STREAM(this->node_->get_logger(), "BpeMode trajectory z max: " << z_max);
@@ -331,36 +326,6 @@ void BpeMode::update_desired_trajectory() {
         jdes[i][2] = 0.0;
     }
 
-    // for (size_t i = 0; i < n_agents; i++) {
-        
-    //     A = double((i)*A_offset_);
-
-    //     // Give virtual agents an amplitude of 10
-    //     if (i < first_drone_id-leader_id) {
-    //             A = 10;
-    //     }
-
-    //     // Compute the desired position
-    //     pdes[i][0] = A*sin(omega*t - i*M_PI/2);
-    //     pdes[i][1] = A*cos(omega*t - i*M_PI/2);
-    //     pdes[i][2] = (z_min + z_max) / 2;
-
-    //     // Compute the desired velocity
-    //     vdes[i][0] =  omega*A*cos(omega*t - i*M_PI/2);
-    //     vdes[i][1] = -omega*A*sin(omega*t - i*M_PI/2);
-    //     vdes[i][2] = 0.0;
-
-    //     // Compute the desired acceleration
-    //     udes[i][0] = -std::pow(omega,2)*A*sin(omega*t - i*M_PI/2);
-    //     udes[i][1] = -std::pow(omega,2)*A*cos(omega*t - i*M_PI/2);
-    //     udes[i][2] = 0.0;
-        
-    //     // Compute the desired jerk
-    //     jdes[i][0] = -std::pow(omega,3)*A*cos(omega*t - i*M_PI/2);
-    //     jdes[i][1] =  std::pow(omega,3)*A*sin(omega*t - i*M_PI/2);
-    //     jdes[i][2] = 0.0;
-    // }
-
     // In case of a virtual leader
     for (size_t i = 0; i < first_drone_id - leader_id; i++) {
             P_other[i] = pdes[i];
@@ -385,9 +350,6 @@ void BpeMode::update_vehicle_state() {
 
     // Get the current position
     P = state.position;
-
-    // Since in the simulation all the drones start at the same position, we add a small offset to the position between the vehicles
-    if (sim) P[1] += (drone_id-first_drone_id)*3.0;
 
     // Get the current velocity
     V = state.velocity;

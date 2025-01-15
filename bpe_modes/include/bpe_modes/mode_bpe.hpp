@@ -100,5 +100,12 @@ protected:
     rclcpp::Publisher<pegasus_msgs::msg::ControlAttitude>::SharedPtr desired_attitude_publisher_{nullptr};
     rclcpp::Publisher<pegasus_msgs::msg::ControlAttitude>::SharedPtr desired_attitude_rate_publisher_{nullptr};
     rclcpp::Publisher<pegasus_msgs::msg::ControlPosition>::SharedPtr desired_position_publisher_{nullptr};
+
+    // New trajectory variables
+    double gamma_{0.0};
+    Eigen::Vector3d p_target_{Eigen::Vector3d(-3.5, 0.0, -1.3)};
+    Eigen::Vector3d p_follower_1_{Eigen::Vector3d(-3.5, 2.0, -1.3)};
+
+    void horizontal_trajectory(double dt);
 };
 }

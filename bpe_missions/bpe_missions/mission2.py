@@ -15,21 +15,11 @@ class Drone(Node):
         self.id = id
         self.namespace = 'drone'
 
-        # Variables to store the position of the drone
-        self.pos_x = 0.0
-        self.pos_y = 0.0
-        self.pos_z = 0.0
-
         # Create the service clients for the drone
         self.add_waypoint_srv = self.create_client(Waypoint, '/drone' + str(id) +'/autopilot/set_waypoint')
         print('Initializing service: /drone' + str(id) +'/autopilot/set_waypoint')
         while not self.add_waypoint_srv.wait_for_service(timeout_sec=10.0):
             self.get_logger().info('service not availtimeout_secable, waiting again...')
-
-        self.add_circle_srv = self.create_client(AddCircle, '/drone' + str(id) +'/autopilot/trajectory/add_circle')
-        print('Initializing service: /drone' + str(id) +'/autopilot/add_circle')
-        while not self.add_circle_srv.wait_for_service(timeout_sec=10.0):
-            self.get_logger().info('service not available, waiting again...')
 
         self.set_autopilot_srv = self.create_client(SetMode, '/drone' + str(id) +'/autopilot/change_mode')
         print('Initializing service: /drone' + str(id) +'/autopilot/change_mode')
@@ -39,12 +29,8 @@ class Drone(Node):
         # Create subscriptions
         self.create_subscription(AutopilotStatus, '/drone' + str(id) + '/autopilot/status', self.autopilot_status_callback, qos_profile_sensor_data)
 
-        # Create subscriptions to listen to the drone's position (replace PositionStatus with your message type)
-        self.create_subscription(Odometry, '/drone' + str(id) + '/fmu/filter/state', self.position_status_callback, qos_profile_sensor_data)
-
         # Requests messages
         self.waypoint_req = Waypoint.Request()
-        self.circle_req = AddCircle.Request()
         self.set_mode_req = SetMode.Request()
 
 
@@ -85,7 +71,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     drones = []
-    n_drones = 3
+    n_drones = 1
     first_drone_id = 1
 
     for i in range(n_drones):
@@ -103,26 +89,18 @@ def main(args=None):
     # Wait for takeoff
     time.sleep(7)
 
-    A = 0.60
-
     # Set the waypoints for the drones
-    drones[0].set_waypoint(-A,  0.0, -0.5, 0.0)
+    drones[0].set_waypoint(-3.0,  0.0, -0.5, 0.0)
     drones[0].set_autopilot_mode('WaypointMode')
-
-    drones[1].set_waypoint(0.0,  -A, -0.5, 0.0)
-    drones[1].set_autopilot_mode('WaypointMode')
-    
-    drones[2].set_waypoint(A, 0.0, -0.5, 0.0)
-    drones[2].set_autopilot_mode('WaypointMode')
 
     time.sleep(6)
 
     # Start the mission
     for i in range(n_drones):
-        drones[i].set_autopilot_mode('BpeMode')
+        drones[i].set_autopilot_mode('BpeMode2')
 
     # Land the drone
-    time.sleep(150)
+    time.sleep(30)
     for i in range(n_drones):
         drones[i].set_autopilot_mode('LandMode')
 

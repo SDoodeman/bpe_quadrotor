@@ -19,22 +19,16 @@ find_package(pegasus_utils REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 
-# Import the casadi dependency in the pegasus_external
-# find_package(casadi_vendor REQUIRED)
-# find_package(casadi REQUIRED)
-
 add_library(${PROJECT_NAME} 
   src/mode_bpe.cpp
+  src/mode_bpe2.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
   ${EIGEN3_INCLUDE_DIRS}
-  # ${CASADI_INCLUDE_DIR}
 )
-
-# target_link_libraries(${PROJECT_NAME} casadi)
 
 add_definitions(${EIGEN3_DEFINITIONS})
 
@@ -43,9 +37,7 @@ set(dependencies
   pluginlib
   pegasus_utils
   nav_msgs
-  # casadi_vendor
   ament_index_cpp
-  # casadi
 )
 
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
@@ -60,25 +52,6 @@ install(
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
-
-# Library for the pre-generated Casadi optimization code
-# add_library(gen src/gen.cpp)
-# set_target_properties(gen PROPERTIES COMPILE_FLAGS "-fPIC -shared -O3")
-
-# target_include_directories(gen PUBLIC
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#   $<INSTALL_INTERFACE:include>
-# )
-
-# target_link_libraries(gen casadi)
-
-# install(
-#   TARGETS gen
-#   EXPORT export_gen
-#   ARCHIVE DESTINATION lib
-#   LIBRARY DESTINATION lib
-#   RUNTIME DESTINATION bin
-# )
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.

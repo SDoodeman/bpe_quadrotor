@@ -20,6 +20,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mission=bpe_missions.mission:main',
+            'mission2=bpe_missions.mission2:main',
             'land=bpe_missions.land:main'
         ],
     },
