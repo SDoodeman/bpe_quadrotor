@@ -99,12 +99,13 @@
         gains:
           leader:
             Kp: 7.0
-            Kv: 5.0
+            Kv: 6.5
             Kr: 3.0
           followers:
-            Kp: 5.0
-            Kv: 3.0
+            Kp: 7.0
+            Kv: 6.5
             Kr: 3.0
+        statistics_publisher: "bpe/statistics"
       BpeMode:
         valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
         fallback: "HoldMode"

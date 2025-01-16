@@ -74,5 +74,9 @@ protected:
 
     // The attitude of this vehicle
     Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};  // Attitude of this vehicle
+
+    // Statistics message for the BPE Mode and publisher
+    bpe_msgs::msg::BpeStatistics statistics_msg_;
+    rclcpp::Publisher<bpe_msgs::msg::BpeStatistics>::SharedPtr statistics_publisher_;
 };
 }

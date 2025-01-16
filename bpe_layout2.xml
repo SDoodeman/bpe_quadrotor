@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+ <tabbed_widget name="Main Window" parent="main_window">
+  <Tab tab_name="Drone2 - Abs error" containers="1">
+   <Container>
+    <DockSplitter sizes="1" count="1" orientation="-">
+     <DockSplitter sizes="0.500384;0.499616" count="2" orientation="|">
+      <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+       <DockArea name="...">
+        <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+         <range top="0.728209" bottom="-0.178079" left="0.000000" right="120.118484"/>
+         <limitY/>
+         <curve name="/drone2/bpe/statistics/pos_error[0]" color="#1f77b4"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+         <range top="0.782051" bottom="-1.368072" left="0.000000" right="120.118484"/>
+         <limitY/>
+         <curve name="/drone2/bpe/statistics/pos_error[1]" color="#d62728"/>
+        </plot>
+       </DockArea>
+      </DockSplitter>
+      <DockArea name="...">
+       <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+        <range top="0.438246" bottom="-0.160348" left="0.000000" right="120.118484"/>
+        <limitY/>
+        <curve name="/drone2/bpe/statistics/pos_error[2]" color="#1ac938"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="Desired Follower2" containers="1">
+   <Container>
+    <DockSplitter sizes="1" count="1" orientation="-">
+     <DockSplitter sizes="0.500384;0.499616" count="2" orientation="|">
+      <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+       <DockArea name="...">
+        <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+         <range top="2.957759" bottom="-3.348840" left="0.000000" right="120.118484"/>
+         <limitY/>
+         <curve name="/drone2/bpe/statistics/p1[0]" color="#bcbd22"/>
+         <curve name="/drone2/bpe/statistics/pdes1[0]" color="#1ac938"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+         <range top="1.890802" bottom="-1.922888" left="0.000000" right="120.118484"/>
+         <limitY/>
+         <curve name="/drone2/bpe/statistics/p1[1]" color="#1f77b4"/>
+         <curve name="/drone2/bpe/statistics/pdes1[1]" color="#ff7f0e"/>
+        </plot>
+       </DockArea>
+      </DockSplitter>
+      <DockArea name="...">
+       <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+        <range top="-0.435673" bottom="-1.935715" left="0.000000" right="120.118484"/>
+        <limitY/>
+        <curve name="/drone2/bpe/statistics/p1[2]" color="#d62728"/>
+        <curve name="/drone2/bpe/statistics/pdes1[2]" color="#f14cc1"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="Drone3 - Abs error" containers="1">
+   <Container>
+    <DockSplitter sizes="1" count="1" orientation="-">
+     <DockSplitter sizes="0.500384;0.499616" count="2" orientation="|">
+      <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+       <DockArea name="...">
+        <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+         <range top="3.351042" bottom="-0.284499" left="0.035334" right="120.185975"/>
+         <limitY/>
+         <curve name="/drone3/bpe/statistics/pos_error[0]" color="#ff7f0e"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+         <range top="1.094083" bottom="-0.827648" left="0.035334" right="120.185975"/>
+         <limitY/>
+         <curve name="/drone3/bpe/statistics/pos_error[1]" color="#f14cc1"/>
+        </plot>
+       </DockArea>
+      </DockSplitter>
+      <DockArea name="...">
+       <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+        <range top="0.313061" bottom="-0.434446" left="0.035334" right="120.185975"/>
+        <limitY/>
+        <curve name="/drone3/bpe/statistics/pos_error[2]" color="#9467bd"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="Desired Leader" containers="1">
+   <Container>
+    <DockSplitter sizes="1" count="1" orientation="-">
+     <DockSplitter sizes="0.500384;0.499616" count="2" orientation="|">
+      <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+       <DockArea name="...">
+        <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+         <range top="0.100000" bottom="-0.100000" left="0.035334" right="120.185975"/>
+         <limitY/>
+         <curve name="/drone3/bpe/statistics/p0[0]" color="#17becf"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+         <range top="0.100000" bottom="-0.100000" left="0.035334" right="120.185975"/>
+         <limitY/>
+         <curve name="/drone3/bpe/statistics/p0[1]" color="#bcbd22"/>
+        </plot>
+       </DockArea>
+      </DockSplitter>
+      <DockArea name="...">
+       <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+        <range top="0.100000" bottom="-0.100000" left="0.035334" right="120.185975"/>
+        <limitY/>
+        <curve name="/drone3/bpe/statistics/p0[2]" color="#1f77b4"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="1"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <!-- - - - - - - - - - - - - - - -->
+ <Plugins>
+  <plugin ID="DataLoad CSV">
+   <parameters time_axis="" delimiter="0"/>
+  </plugin>
+  <plugin ID="DataLoad MCAP"/>
+  <plugin ID="DataLoad ROS2 bags">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+   <boolean_strings_to_number value="true"/>
+   <remove_suffix_from_strings value="true"/>
+   <selected_topics value="/drone10/autopilot/status;/drone10/desired_control_attitude;/drone10/desired_control_attitude_rate;/drone10/desired_control_position;/drone10/fmu/constants;/drone10/fmu/filter/rpy;/drone10/fmu/filter/state;/drone10/fmu/in/force/attitude;/drone10/fmu/in/force/attitude_rate;/drone10/fmu/sensors/barometer;/drone10/fmu/sensors/gps;/drone10/fmu/sensors/gps_info;/drone10/fmu/sensors/imu;/drone10/fmu/status;/drone10/statistics/pid;/drone8/autopilot/status;/drone8/desired_control_attitude;/drone8/desired_control_attitude_rate;/drone8/desired_control_position;/drone8/fmu/constants;/drone8/fmu/filter/rpy;/drone8/fmu/filter/state;/drone8/fmu/in/force/attitude;/drone8/fmu/in/force/attitude_rate;/drone8/fmu/sensors/barometer;/drone8/fmu/sensors/gps;/drone8/fmu/sensors/gps_info;/drone8/fmu/sensors/imu;/drone8/fmu/status;/drone8/statistics/pid;/drone9/autopilot/status;/drone9/desired_control_attitude;/drone9/desired_control_attitude_rate;/drone9/desired_control_position;/drone9/fmu/constants;/drone9/fmu/filter/rpy;/drone9/fmu/filter/state;/drone9/fmu/in/force/attitude;/drone9/fmu/in/force/attitude_rate;/drone9/fmu/sensors/barometer;/drone9/fmu/sensors/gps;/drone9/fmu/sensors/gps_info;/drone9/fmu/sensors/imu;/drone9/fmu/status;/drone9/statistics/pid;/events/write_split;/mocap/pose_enu/drone10;/mocap/pose_enu/drone8;/mocap/pose_enu/drone9;/parameter_events;/rosout"/>
+  </plugin>
+  <plugin ID="DataLoad ULog"/>
+  <plugin ID="ROS2 Topic Subscriber">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+   <boolean_strings_to_number value="true"/>
+   <remove_suffix_from_strings value="true"/>
+   <selected_topics value="/clock;/drone1/fmu/constants;/drone1/fmu/filter/rpy;/drone1/fmu/filter/state;/drone1/fmu/sensors/barometer;/drone1/fmu/sensors/gps;/drone1/fmu/sensors/gps_info;/drone1/fmu/sensors/imu;/drone1/fmu/status;/drone1/simulator/state;/drone2/fmu/constants;/drone2/fmu/filter/rpy;/drone2/fmu/filter/state;/drone2/fmu/in/force/attitude;/drone2/fmu/in/inertial_acceleration;/drone2/fmu/in/position;/drone2/fmu/in/throtle/attitude;/drone2/fmu/in/throtle/attitude_rate;/drone2/fmu/in/velocity/body;/drone2/fmu/in/velocity/inertial;/drone2/fmu/sensors/barometer;/drone2/fmu/sensors/gps;/drone2/fmu/sensors/gps_info;/drone2/fmu/sensors/imu;/drone2/fmu/status;/drone2/simulator/state;/drone3/autopilot/status;/drone3/bpe/statistics;/drone3/desired_control_attitude;/drone3/desired_control_attitude_rate;/drone3/desired_control_position;/drone3/fmu/constants;/drone3/fmu/filter/rpy;/drone3/fmu/filter/state;/drone3/fmu/in/force/attitude;/drone3/fmu/in/force/attitude_rate;/drone3/fmu/in/inertial_acceleration;/drone3/fmu/in/position;/drone3/fmu/in/throtle/attitude;/drone3/fmu/in/throtle/attitude_rate;/drone3/fmu/in/velocity/body;/drone3/fmu/in/velocity/inertial;/drone3/fmu/sensors/barometer;/drone3/fmu/sensors/gps;/drone3/fmu/sensors/gps_info;/drone3/fmu/sensors/imu;/drone3/fmu/status;/drone3/simulator/state;/drone3/statistics/pid;/mocap/pose_enu/drone1;/mocap/pose_enu/drone2;/mocap/pose_enu/drone3;/parameter_events;/performance_metrics;/rosout;/drone1/autopilot/status;/drone1/bpe/statistics;/drone1/desired_control_attitude;/drone1/desired_control_attitude_rate;/drone1/desired_control_position;/drone1/fmu/in/force/attitude;/drone1/fmu/in/force/attitude_rate;/drone1/fmu/in/inertial_acceleration;/drone1/fmu/in/position;/drone1/fmu/in/throtle/attitude;/drone1/fmu/in/throtle/attitude_rate;/drone1/fmu/in/velocity/body;/drone1/fmu/in/velocity/inertial;/drone1/statistics/pid;/drone2/fmu/in/force/attitude_rate;/drone2/autopilot/status;/drone2/bpe/statistics;/drone2/desired_control_attitude;/drone2/desired_control_attitude_rate;/drone2/desired_control_position;/drone2/statistics/pid"/>
+  </plugin>
+  <plugin ID="UDP Server"/>
+  <plugin ID="WebSocket Server"/>
+  <plugin ID="ZMQ Subscriber"/>
+  <plugin ID="Fast Fourier Transform"/>
+  <plugin ID="Quaternion to RPY"/>
+  <plugin ID="Reactive Script Editor">
+   <library code="--[[ Helper function to create a series from arrays&#xa;&#xa; new_series: a series previously created with ScatterXY.new(name)&#xa; prefix:     prefix of the timeseries, before the index of the array&#xa; suffix_X:   suffix to complete the name of the series containing the X value. If [nil], use the index of the array.&#xa; suffix_Y:   suffix to complete the name of the series containing the Y value&#xa; timestamp:   usually the tracker_time variable&#xa;              &#xa; Example:&#xa; &#xa; Assuming we have multiple series in the form:&#xa; &#xa;   /trajectory/node.{X}/position/x&#xa;   /trajectory/node.{X}/position/y&#xa;   &#xa; where {N} is the index of the array (integer). We can create a reactive series from the array with:&#xa; &#xa;   new_series = ScatterXY.new(&quot;my_trajectory&quot;) &#xa;   CreateSeriesFromArray( new_series, &quot;/trajectory/node&quot;, &quot;position/x&quot;, &quot;position/y&quot;, tracker_time );&#xa;--]]&#xa;&#xa;function CreateSeriesFromArray( new_series, prefix, suffix_X, suffix_Y, timestamp )&#xa;  &#xa;  --- clear previous values&#xa;  new_series:clear()&#xa;  &#xa;  --- Append points to new_series&#xa;  index = 0&#xa;  while(true) do&#xa;&#xa;    x = index;&#xa;    -- if not nil, get the X coordinate from a series&#xa;    if suffix_X ~= nil then &#xa;      series_x = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_X) )&#xa;      if series_x == nil then break end&#xa;      x = series_x:atTime(timestamp)&#x9; &#xa;    end&#xa;    &#xa;    series_y = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_Y) )&#xa;    if series_y == nil then break end &#xa;    y = series_y:atTime(timestamp)&#xa;    &#xa;    new_series:push_back(x,y)&#xa;    index = index+1&#xa;  end&#xa;end&#xa;&#xa;--[[ Similar to the built-in function GetSeriesNames(), but select only the names with a give prefix. --]]&#xa;&#xa;function GetSeriesNamesByPrefix(prefix)&#xa;  -- GetSeriesNames(9 is a built-in function&#xa;  all_names = GetSeriesNames()&#xa;  filtered_names = {}&#xa;  for i, name in ipairs(all_names)  do&#xa;    -- check the prefix&#xa;    if name:find(prefix, 1, #prefix) then&#xa;      table.insert(filtered_names, name);&#xa;    end&#xa;  end&#xa;  return filtered_names&#xa;end&#xa;&#xa;--[[ Modify an existing series, applying offsets to all their X and Y values&#xa;&#xa; series: an existing timeseries, obtained with TimeseriesView.find(name)&#xa; delta_x: offset to apply to each x value&#xa; delta_y: offset to apply to each y value &#xa;  &#xa;--]]&#xa;&#xa;function ApplyOffsetInPlace(series, delta_x, delta_y)&#xa;  -- use C++ indeces, not Lua indeces&#xa;  for index=0, series:size()-1 do&#xa;    x,y = series:at(index)&#xa;    series:set(index, x + delta_x, y + delta_y)&#xa;  end&#xa;end&#xa;"/>
+   <scripts/>
+  </plugin>
+  <plugin ID="CSV Exporter"/>
+  <plugin ID="ROS2 Topic Re-Publisher"/>
+ </Plugins>
+ <!-- - - - - - - - - - - - - - - -->
+ <previouslyLoaded_Datafiles/>
+ <previouslyLoaded_Streamer name="ROS2 Topic Subscriber"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <customMathEquations/>
+ <snippets/>
+ <!-- - - - - - - - - - - - - - - -->
+</root>
+

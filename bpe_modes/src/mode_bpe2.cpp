@@ -61,6 +61,10 @@ void BpeMode2::initialize() {
         Kr_ = node_->get_parameter("autopilot.BpeMode2.gains.followers.Kr").as_double();
     }
 
+    // Initialize the statistics publisher
+    node_->declare_parameter<std::string>("autopilot.BpeMode2.statistics_publisher", "bpe_statistics");
+    statistics_publisher_ = node_->create_publisher<bpe_msgs::msg::BpeStatistics>(
+        node_->get_parameter("autopilot.BpeMode2.statistics_publisher").as_string(), rclcpp::SensorDataQoS());
 
     // Initialize the desired trajectory
     initialize_trajectory();
@@ -141,7 +145,60 @@ void BpeMode2::update(double dt) {
 
     this->controller_->set_attitude(attitude, thrust, dt);
 
+    // Increment the total time elapsed
     total_time_ += dt;
+
+    // --------------------------------
+    // Set the statistics message
+    // --------------------------------
+    statistics_msg_.header.stamp = node_->now();
+    statistics_msg_.drone_id = drone_id_;
+    statistics_msg_.total_time = total_time_;
+    // Update the desired trajectory
+    for(int i=0; i < 3; i++) {
+        statistics_msg_.pdes0[i] = pdes_[0][i];
+        statistics_msg_.pdes1[i] = pdes_[1][i];
+        statistics_msg_.pdes2[i] = pdes_[2][i];
+
+        statistics_msg_.vdes0[i] = vdes_[0][i];
+        statistics_msg_.vdes1[i] = vdes_[1][i];
+        statistics_msg_.vdes2[i] = vdes_[2][i];
+
+        statistics_msg_.udes0[i] = udes_[0][i];
+        statistics_msg_.udes1[i] = udes_[1][i];
+        statistics_msg_.udes2[i] = udes_[2][i];
+
+        statistics_msg_.jdes0[i] = jdes_[0][i];
+        statistics_msg_.jdes1[i] = jdes_[1][i];
+        statistics_msg_.jdes2[i] = jdes_[2][i];
+
+        // Update the state of the leader and followers position and velocity
+        statistics_msg_.p0[i] = P_[0][i];
+        statistics_msg_.p1[i] = P_[1][i];
+        statistics_msg_.p2[i] = P_[2][i];
+
+        statistics_msg_.v0[i] = V_[0][i];
+        statistics_msg_.v1[i] = V_[1][i];
+        statistics_msg_.v2[i] = V_[2][i];
+
+        // Update the position and velocity errors
+        statistics_msg_.pos_error[i] = P_[id][i] - pdes_[id][i];
+        statistics_msg_.vel_error[i] = V_[id][i] - vdes_[id][i];
+    
+        // Update the desired acceleration reference
+        statistics_msg_.desired_acceleration[i] = u[0];
+        statistics_msg_.desired_acceleration[i] = u[1];
+        statistics_msg_.desired_acceleration[i] = u[2];
+
+        // Update the thrust reference
+        statistics_msg_.thrust_reference = thrust;
+
+        // Update the desired roll, pitch and yaw angles
+        statistics_msg_.desired_roll = attitude[0];
+        statistics_msg_.desired_pitch = attitude[1];
+        statistics_msg_.desired_yaw = attitude[2];
+    }
+    statistics_publisher_->publish(statistics_msg_);
 }
 
 bool BpeMode2::enter() {

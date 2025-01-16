@@ -1,6 +1,7 @@
 std_msgs/Header header
 # Reference signals as seen from drone i
-uint8 id
+uint8 drone_id
+float64 total_time
 # Desired reference for the leader drone
 float64[3] pdes0
 float64[3] vdes0
@@ -37,6 +38,6 @@ float64 desired_roll
 float64 desired_pitch
 float64 desired_yaw
 # Current attitude of the drone (in deg)
-float64 state_roll
-float64 state_pitch
-float64 state_yaw
+#float64 state_roll
+#float64 state_pitch
+#float64 state_yaw
