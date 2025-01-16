@@ -14,12 +14,8 @@ void BpeMode2::initialize() {
     mass_ = get_vehicle_constants().mass;
 
     // Configure the adjacency matrix
-    // aij_ << 0, 0, 0,
-    //         1, 0, 1,
-    //         1, 1, 0;
-
     aij_ << 0, 0, 0,
-            1, 0, 0,
+            1, 0, 1,
             1, 1, 0;
 
     // Get the list of drone ids associated with the leader, the first follower and the second follower
@@ -61,10 +57,41 @@ void BpeMode2::initialize() {
         Kr_ = node_->get_parameter("autopilot.BpeMode2.gains.followers.Kr").as_double();
     }
 
+    // --------------------------------------------------------------
+    // Initialize the ROS 2 publisher for the statistics
+    // --------------------------------------------------------------
+
     // Initialize the statistics publisher
     node_->declare_parameter<std::string>("autopilot.BpeMode2.statistics_publisher", "bpe_statistics");
     statistics_publisher_ = node_->create_publisher<bpe_msgs::msg::BpeStatistics>(
         node_->get_parameter("autopilot.BpeMode2.statistics_publisher").as_string(), rclcpp::SensorDataQoS());
+
+    node_->declare_parameter<std::string>("autopilot.BpeMode2.publishers.control_attitude", "desired_control_attitude");
+    node_->declare_parameter<std::string>("autopilot.BpeMode2.publishers.control_attitude_rate", "desired_control_attitude_rate");
+    node_->declare_parameter<std::string>("autopilot.BpeMode2.publishers.control_position", "desired_control_position");
+    node_->declare_parameter<std::string>("autopilot.BpeMode2.publishers.position_error", "position_error");
+
+    // Create the publishers
+    desired_attitude_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlAttitude>(node_->get_parameter("autopilot.BpeMode2.publishers.control_attitude").as_string(), rclcpp::SensorDataQoS());
+    desired_attitude_rate_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlAttitude>(node_->get_parameter("autopilot.BpeMode2.publishers.control_attitude_rate").as_string(), rclcpp::SensorDataQoS());
+    desired_position_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlPosition>(node_->get_parameter("autopilot.BpeMode2.publishers.control_position").as_string(), rclcpp::SensorDataQoS());
+    position_error_publisher_ = node_->create_publisher<std_msgs::msg::Float64>(node_->get_parameter("autopilot.BpeMode2.publishers.position_error").as_string(), rclcpp::SensorDataQoS());
+    total_time_publisher_ = node_->create_publisher<std_msgs::msg::Float64>("total_time", rclcpp::SensorDataQoS());
+
+    // --------------------------------------------------------------
+    // Subscribe to the position of the other real agents
+    // --------------------------------------------------------------
+    for(int j=0; j < n_agents_; j++) {
+        if (aij_(graph_ids_[drone_id_],j)) {
+            target_subs_.push_back(node_->create_subscription<nav_msgs::msg::Odometry>(
+                "/drone" + std::to_string(drone_ids_[j]) + "/fmu/filter/state",
+                rclcpp::SensorDataQoS(),
+                [this, j](const nav_msgs::msg::Odometry::ConstSharedPtr msg) {
+                    this->target_state_callback(msg, drone_ids_[j]);  // Capture i and pass to callback
+                }
+            ));
+        }
+    }
 
     // Initialize the desired trajectory
     initialize_trajectory();
@@ -116,15 +143,10 @@ void BpeMode2::update(double dt) {
                 u += - Kp_*(pijd - gij * gij.dot(pijd));
 
                 // Compute the desired velocity error (for the trajectory to be executed)
-                u += -Kv_ / N_following_ * ((V_[j] - V_[id]) - (vdes_[j] - vdes_[id]));
-
-                // TODO: Check if it is (j - id) or (id - j)
+                u += -Kv_ / N_following_ * ((V_[id] - V_[j]) - (vdes_[id] - vdes_[j]));
             }
         }
     }
-
-    // TODO: only for debugging
-    u = udes_[id] - Kp_*(P_[id] - pdes_[id]) - Kv_*(V_[id] - vdes_[id]);
 
     // Compute the desired total force to apply
     const static Eigen::Vector3d e3(0, 0, 1);
@@ -151,54 +173,16 @@ void BpeMode2::update(double dt) {
     // --------------------------------
     // Set the statistics message
     // --------------------------------
-    statistics_msg_.header.stamp = node_->now();
-    statistics_msg_.drone_id = drone_id_;
-    statistics_msg_.total_time = total_time_;
-    // Update the desired trajectory
-    for(int i=0; i < 3; i++) {
-        statistics_msg_.pdes0[i] = pdes_[0][i];
-        statistics_msg_.pdes1[i] = pdes_[1][i];
-        statistics_msg_.pdes2[i] = pdes_[2][i];
+    desired_position_msg_.position[0] = pdes_[id][0];
+    desired_position_msg_.position[1] = pdes_[id][1];
+    desired_position_msg_.position[2] = pdes_[id][2];
+    desired_position_publisher_->publish(desired_position_msg_);
 
-        statistics_msg_.vdes0[i] = vdes_[0][i];
-        statistics_msg_.vdes1[i] = vdes_[1][i];
-        statistics_msg_.vdes2[i] = vdes_[2][i];
+    position_error_msg_.data = (P_[id] - pdes_[id]).norm();
+    position_error_publisher_->publish(position_error_msg_);
 
-        statistics_msg_.udes0[i] = udes_[0][i];
-        statistics_msg_.udes1[i] = udes_[1][i];
-        statistics_msg_.udes2[i] = udes_[2][i];
-
-        statistics_msg_.jdes0[i] = jdes_[0][i];
-        statistics_msg_.jdes1[i] = jdes_[1][i];
-        statistics_msg_.jdes2[i] = jdes_[2][i];
-
-        // Update the state of the leader and followers position and velocity
-        statistics_msg_.p0[i] = P_[0][i];
-        statistics_msg_.p1[i] = P_[1][i];
-        statistics_msg_.p2[i] = P_[2][i];
-
-        statistics_msg_.v0[i] = V_[0][i];
-        statistics_msg_.v1[i] = V_[1][i];
-        statistics_msg_.v2[i] = V_[2][i];
-
-        // Update the position and velocity errors
-        statistics_msg_.pos_error[i] = P_[id][i] - pdes_[id][i];
-        statistics_msg_.vel_error[i] = V_[id][i] - vdes_[id][i];
-    
-        // Update the desired acceleration reference
-        statistics_msg_.desired_acceleration[i] = u[0];
-        statistics_msg_.desired_acceleration[i] = u[1];
-        statistics_msg_.desired_acceleration[i] = u[2];
-
-        // Update the thrust reference
-        statistics_msg_.thrust_reference = thrust;
-
-        // Update the desired roll, pitch and yaw angles
-        statistics_msg_.desired_roll = attitude[0];
-        statistics_msg_.desired_pitch = attitude[1];
-        statistics_msg_.desired_yaw = attitude[2];
-    }
-    statistics_publisher_->publish(statistics_msg_);
+    total_time_msg_.data = total_time_;
+    total_time_publisher_->publish(total_time_msg_);
 }
 
 bool BpeMode2::enter() {
@@ -212,6 +196,7 @@ bool BpeMode2::exit() {
 
     // Reset the total time
     total_time_ = 0.0;
+    initialize_trajectory();
     return true;
 }
 
@@ -257,10 +242,10 @@ void BpeMode2::trajectory_generation(double dt) {
     double leader_velocity_x = 6.0 / 120.0;
     pdes_[0][0] += leader_velocity_x * dt;
 
-    double radius_x = 0.7;
-    double radius_y = 1.8;
+    double radius_x = 0.6;
+    double radius_y = 0.6;
 
-    double f = 0.03;
+    double f = 0.10;
 
     // Define the desired position for the first follower
     pdes_[1][0] = pdes_[0][0] - 0.20;
@@ -279,7 +264,7 @@ void BpeMode2::trajectory_generation(double dt) {
 
     // -------------------------------------------------------------------------------
 
-    double offset = 2 * M_PI / 3;
+    double offset = M_PI;
 
     // Define the desired position of the second follower
     pdes_[2][0] = pdes_[0][0] + 0.20;
@@ -298,6 +283,56 @@ void BpeMode2::trajectory_generation(double dt) {
 }
 
 } // namespace autopilot
+
+
+// statistics_msg_.header.stamp = node_->now();
+//     statistics_msg_.drone_id = drone_id_;
+//     statistics_msg_.total_time = total_time_;
+//     // Update the desired trajectory
+//     for(int i=0; i < 3; i++) {
+//         statistics_msg_.pdes0[i] = pdes_[0][i];
+//         statistics_msg_.pdes1[i] = pdes_[1][i];
+//         statistics_msg_.pdes2[i] = pdes_[2][i];
+
+//         statistics_msg_.vdes0[i] = vdes_[0][i];
+//         statistics_msg_.vdes1[i] = vdes_[1][i];
+//         statistics_msg_.vdes2[i] = vdes_[2][i];
+
+//         statistics_msg_.udes0[i] = udes_[0][i];
+//         statistics_msg_.udes1[i] = udes_[1][i];
+//         statistics_msg_.udes2[i] = udes_[2][i];
+
+//         statistics_msg_.jdes0[i] = jdes_[0][i];
+//         statistics_msg_.jdes1[i] = jdes_[1][i];
+//         statistics_msg_.jdes2[i] = jdes_[2][i];
+
+//         // Update the state of the leader and followers position and velocity
+//         statistics_msg_.p0[i] = P_[0][i];
+//         statistics_msg_.p1[i] = P_[1][i];
+//         statistics_msg_.p2[i] = P_[2][i];
+
+//         statistics_msg_.v0[i] = V_[0][i];
+//         statistics_msg_.v1[i] = V_[1][i];
+//         statistics_msg_.v2[i] = V_[2][i];
+
+//         // Update the position and velocity errors
+//         statistics_msg_.pos_error[i] = P_[id][i] - pdes_[id][i];
+//         statistics_msg_.vel_error[i] = V_[id][i] - vdes_[id][i];
+    
+//         // Update the desired acceleration reference
+//         statistics_msg_.desired_acceleration[i] = u[0];
+//         statistics_msg_.desired_acceleration[i] = u[1];
+//         statistics_msg_.desired_acceleration[i] = u[2];
+
+//         // Update the thrust reference
+//         statistics_msg_.thrust_reference = thrust;
+
+//         // Update the desired roll, pitch and yaw angles
+//         statistics_msg_.desired_roll = attitude[0];
+//         statistics_msg_.desired_pitch = attitude[1];
+//         statistics_msg_.desired_yaw = attitude[2];
+//     }
+//     statistics_publisher_->publish(statistics_msg_);
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(autopilot::BpeMode2, autopilot::Mode)

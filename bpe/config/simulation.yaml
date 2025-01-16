@@ -102,8 +102,8 @@
             Kv: 6.5
             Kr: 3.0
           followers:
-            Kp: 7.0
-            Kv: 6.5
+            Kp: 4.0
+            Kv: 3.5
             Kr: 3.0
         statistics_publisher: "bpe/statistics"
       BpeMode:

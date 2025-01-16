@@ -8,6 +8,7 @@
 #include <rosgraph_msgs/msg/clock.hpp>
 #include "pegasus_msgs/msg/control_attitude.hpp"
 #include "pegasus_msgs/msg/control_position.hpp"
+#include <std_msgs/msg/float64.hpp>
 
 namespace autopilot {
 
@@ -78,5 +79,19 @@ protected:
     // Statistics message for the BPE Mode and publisher
     bpe_msgs::msg::BpeStatistics statistics_msg_;
     rclcpp::Publisher<bpe_msgs::msg::BpeStatistics>::SharedPtr statistics_publisher_;
+
+    // ROS2 messages
+    pegasus_msgs::msg::ControlAttitude desired_attitude_msg_;
+    pegasus_msgs::msg::ControlAttitude desired_attitude_rate_msg_;
+    pegasus_msgs::msg::ControlPosition desired_position_msg_;
+    std_msgs::msg::Float64 position_error_msg_;
+    std_msgs::msg::Float64 total_time_msg_;
+
+    // ROS2 publishers
+    rclcpp::Publisher<pegasus_msgs::msg::ControlAttitude>::SharedPtr desired_attitude_publisher_;
+    rclcpp::Publisher<pegasus_msgs::msg::ControlAttitude>::SharedPtr desired_attitude_rate_publisher_;
+    rclcpp::Publisher<pegasus_msgs::msg::ControlPosition>::SharedPtr desired_position_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr position_error_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr total_time_publisher_;
 };
 }

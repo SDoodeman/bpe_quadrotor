@@ -96,8 +96,8 @@ def main(args=None):
     drones[1].set_waypoint(-3.2,  1.0, -0.5, 0.0)
     drones[1].set_autopilot_mode('WaypointMode')
 
-    # drones[2].set_waypoint(-2.8,  1.0, 0.5, 0.0)
-    # drones[2].set_autopilot_mode('WaypointMode')
+    drones[2].set_waypoint(-2.8,  -1.0, -0.5, 0.0)
+    drones[2].set_autopilot_mode('WaypointMode')
 
     time.sleep(6)
 
