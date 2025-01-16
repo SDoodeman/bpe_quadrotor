@@ -14,7 +14,7 @@
   <depend>eigen</depend>
   <depend>pegasus_utils</depend>
   <depend>nav_msgs</depend>
-  <!-- <depend>casadi_vendor</depend> -->
+  <depend>bpe_msgs</depend>
   <depend>ament_index_cpp</depend>
 
   <test_depend>ament_lint_auto</test_depend>

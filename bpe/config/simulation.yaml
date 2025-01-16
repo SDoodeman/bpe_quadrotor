@@ -92,10 +92,19 @@
       # 2) Fallback mode if something goes wrong
       # 3) Other specific operating mode configuration
       BpeMode2:
-        valid_transition: ["HoldMode", "WaypointMode", "LandMode"]
+        valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
         fallback: "HoldMode"
         on_finish: "HoldMode"
         drone_ids: [1, 2, 3]  # First drone is leader, second drone is the first follower, and third is the second follower
+        gains:
+          leader:
+            Kp: 7.0
+            Kv: 5.0
+            Kr: 3.0
+          followers:
+            Kp: 5.0
+            Kv: 3.0
+            Kr: 3.0
       BpeMode:
         valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
         fallback: "HoldMode"

@@ -17,6 +17,7 @@ find_package(pluginlib REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(pegasus_utils REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(bpe_msgs REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 
 add_library(${PROJECT_NAME} 
@@ -37,6 +38,7 @@ set(dependencies
   pluginlib
   pegasus_utils
   nav_msgs
+  bpe_msgs
   ament_index_cpp
 )
 

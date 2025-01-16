@@ -14,8 +14,12 @@ void BpeMode2::initialize() {
     mass_ = get_vehicle_constants().mass;
 
     // Configure the adjacency matrix
+    // aij_ << 0, 0, 0,
+    //         1, 0, 1,
+    //         1, 1, 0;
+
     aij_ << 0, 0, 0,
-            1, 0, 1,
+            1, 0, 0,
             1, 1, 0;
 
     // Get the list of drone ids associated with the leader, the first follower and the second follower
@@ -33,8 +37,38 @@ void BpeMode2::initialize() {
         }
     }
 
+    // ----------------------------------------------------------------
+    // Initialize the gains
+    // ----------------------------------------------------------------
+    // Check if this drone is the leader or just a follower
+    if (drone_id_ == drone_ids_[0]) {
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.leader.Kp", 0.0);
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.leader.Kv", 0.0);
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.leader.Kr", 0.0);
+
+        Kp_ = node_->get_parameter("autopilot.BpeMode2.gains.leader.Kp").as_double();
+        Kv_ = node_->get_parameter("autopilot.BpeMode2.gains.leader.Kv").as_double();
+        Kr_ = node_->get_parameter("autopilot.BpeMode2.gains.leader.Kr").as_double();
+        
+    } else {
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.followers.Kp", 0.0);
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.followers.Kv", 0.0);
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.followers.Kr", 0.0);
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.followers.Ko", 0.0);
+
+        Kp_ = node_->get_parameter("autopilot.BpeMode2.gains.followers.Kp").as_double();
+        Kv_ = node_->get_parameter("autopilot.BpeMode2.gains.followers.Kv").as_double();
+        Kr_ = node_->get_parameter("autopilot.BpeMode2.gains.followers.Kr").as_double();
+    }
+
+
     // Initialize the desired trajectory
     initialize_trajectory();
+
+    // Log the current parameters
+    RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 Kp: %f", Kp_);
+    RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 Kv: %f", Kv_);
+    RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 Kr: %f", Kr_);
 }
 
 void BpeMode2::update(double dt) {
@@ -60,7 +94,7 @@ void BpeMode2::update(double dt) {
     } else {
 
         // Get the desired feed-forward term
-        u = udes_[graph_ids_[drone_id_]];
+        u = udes_[id];
 
         // For each vehicle that we measure the bearing
         for (int j=0; j < n_agents_; j++) {
@@ -85,6 +119,9 @@ void BpeMode2::update(double dt) {
         }
     }
 
+    // TODO: only for debugging
+    u = udes_[id] - Kp_*(P_[id] - pdes_[id]) - Kv_*(V_[id] - vdes_[id]);
+
     // Compute the desired total force to apply
     const static Eigen::Vector3d e3(0, 0, 1);
     Eigen::Vector3d F = mass_*9.81*e3 - mass_*u;
@@ -102,10 +139,8 @@ void BpeMode2::update(double dt) {
     attitude[1] = Pegasus::Rotations::rad_to_deg(atan2(Rde3[0]*cos(yaw_des)+Rde3[1]*sin(yaw_des), Rde3[2]));
     attitude[2] = Pegasus::Rotations::rad_to_deg(yaw_des);
 
-    //this->controller_->set_position(pdes_[id], 0.0, dt);
     this->controller_->set_attitude(attitude, thrust, dt);
 
-    // Update the total time ellapsed
     total_time_ += dt;
 }
 
@@ -162,47 +197,47 @@ void BpeMode2::initialize_trajectory() {
 
 void BpeMode2::trajectory_generation(double dt) {
 
-    // Set the desired velocity of the leader along the x-axis
-    double a = 2;
-    double s = 0.3;
-    double o = 16;
-    double k = 1.3;
-    double v_leader = 1/a*std::pow(k, (-s*std::pow((total_time_-o)/a, 2)));
-    
-    // Set the desired trajectory for the leader drone (only moves along the x-axis)
-    pdes_[0][0] += v_leader*dt;
+    double leader_velocity_x = 6.0 / 120.0;
+    pdes_[0][0] += leader_velocity_x * dt;
 
-    // Define the current radius for the y axis
-    a = 0.7;
-    s = 0.2;
-    o = 15.4;
-    k = 1.3;
-    double radius_y = 2.0 - 1/a*std::pow(k,(-s*std::pow((total_time_-o)/a, 2)));
+    double radius_x = 0.7;
+    double radius_y = 1.8;
 
-    // Define the current radius for the y axis
-    a = 2.7;
-    s = 0.2;
-    o = 15.4;
-    k = 1.3;
-    double radius_x = 0.7 - 1/a*std::pow(k,(-s*std::pow((total_time_-o)/a, 2)));
+    double f = 0.03;
 
     // Define the desired position for the first follower
     pdes_[1][0] = pdes_[0][0] - 0.20;
-    pdes_[1][1] = radius_y * cos(total_time_);
-    pdes_[1][2] = pdes_[0][2] + radius_x * sin(total_time_);
+    pdes_[1][1] = radius_y * cos(2*M_PI*f*total_time_);
+    pdes_[1][2] = pdes_[0][2] + radius_x * sin(2*M_PI*f*total_time_);
 
-    // Define the desired position for the second follower
+    // Define the desired velocity for the first follower
+    vdes_[1][0] = leader_velocity_x;
+    vdes_[1][1] = -radius_y * 2*M_PI*f*sin(2*M_PI*f*total_time_);
+    vdes_[1][2] =  radius_x * 2*M_PI*f*cos(2*M_PI*f*total_time_);
+
+    // Define the desired acceleration for the first follower
+    udes_[1][0] = 0.0;
+    udes_[1][1] = -radius_y * std::pow(2*M_PI*f,2)*cos(2*M_PI*f*total_time_);
+    udes_[1][2] = -radius_x * std::pow(2*M_PI*f,2)*sin(2*M_PI*f*total_time_);
+
+    // -------------------------------------------------------------------------------
+
+    double offset = 2 * M_PI / 3;
+
+    // Define the desired position of the second follower
     pdes_[2][0] = pdes_[0][0] + 0.20;
-    pdes_[2][1] = radius_y * cos(-total_time_);
-    pdes_[2][2] = pdes_[0][2] + radius_x * sin(-total_time_);
+    pdes_[2][1] = radius_y * cos(2*M_PI*f*total_time_ + offset);
+    pdes_[2][2] = pdes_[0][2] + radius_x * sin(2*M_PI*f*total_time_ + offset);
 
-    // Define the desired velocity for the followers
+    // Define the desired velocity for the first follower
+    vdes_[2][0] = leader_velocity_x;
+    vdes_[2][1] = -radius_y * 2*M_PI*f*sin(2*M_PI*f*total_time_ + offset);
+    vdes_[2][2] =  radius_x * 2*M_PI*f*cos(2*M_PI*f*total_time_ + offset);
 
-
-    // Define the desired acceleration for the followers
-
-
-    // Define the desired jerk for the followers
+    // Define the desired acceleration for the first follower
+    udes_[2][0] = 0.0;
+    udes_[2][1] = -radius_y * std::pow(2*M_PI*f,2)*cos(2*M_PI*f*total_time_ + offset);
+    udes_[2][2] = -radius_x * std::pow(2*M_PI*f,2)*sin(2*M_PI*f*total_time_ + offset);
 }
 
 } // namespace autopilot

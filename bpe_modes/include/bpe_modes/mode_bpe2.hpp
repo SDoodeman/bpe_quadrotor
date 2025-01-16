@@ -4,6 +4,7 @@
 #include <array>
 #include <autopilot/mode.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <bpe_msgs/msg/bpe_statistics.hpp>
 #include <rosgraph_msgs/msg/clock.hpp>
 #include "pegasus_msgs/msg/control_attitude.hpp"
 #include "pegasus_msgs/msg/control_position.hpp"
@@ -38,12 +39,12 @@ protected:
     double mass_;
 
     // Only used by the leader drone
-    int total_time_{0};
+    double total_time_{0};
 
     // Tracking Gains
-    double Kp_{7.0};
-    double Kv_{5.0};
-    double Kr_{3.0};
+    double Kp_{0.0};
+    double Kv_{0.0};
+    double Kr_{0.0};
 
     // Adjacency matrix
     const static size_t n_agents_{3};
