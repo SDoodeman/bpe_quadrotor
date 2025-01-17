@@ -49,6 +49,15 @@ def generate_launch_description():
             'launch_pegasus': 'false',
             'vehicle_id': '3',
         }.items())
+
+    # Launch the torus object in the arena
+    torus_launch_file = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/objects/torus.launch.py')),
+        launch_arguments={
+            'x': '0.0',
+            'y': '0.0',
+            'z': '1.2',
+        }.items())
     
     # -----------------------------------------------
     # ---------- CONTROL SYSTEM LANCH  --------------
@@ -174,6 +183,7 @@ def generate_launch_description():
         iris_launch_file,
         iris2_launch_file,
         iris3_launch_file,
+        torus_launch_file,
         # Launch files for the control system
         drone_params_file_arg,
         mocap_emulator1_launch_file,

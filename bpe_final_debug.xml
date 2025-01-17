@@ -4,11 +4,11 @@
   <Tab tab_name="Drone 1" containers="1">
    <Container>
     <DockSplitter orientation="-" count="1" sizes="1">
-     <DockSplitter orientation="|" count="2" sizes="0.500885;0.499115">
-      <DockSplitter orientation="-" count="2" sizes="0.500852;0.499148">
+     <DockSplitter orientation="|" count="2" sizes="0.501046;0.498954">
+      <DockSplitter orientation="-" count="2" sizes="0.500805;0.499195">
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="0.009767" left="447.688014" bottom="-0.061513" right="527.945151"/>
+         <range top="0.008534" left="2623.608358" bottom="-0.048092" right="2655.526928"/>
          <limitY/>
          <curve color="#1f77b4" name="/drone1/desired_control_position/position[0]"/>
          <curve color="#17becf" name="/drone1/fmu/filter/state/pose/pose/position/x"/>
@@ -16,17 +16,17 @@
        </DockArea>
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="1.560364" left="447.688014" bottom="-0.066427" right="527.945151"/>
+         <range top="1.552418" left="2623.608358" bottom="-0.054319" right="2655.526928"/>
          <limitY/>
          <curve color="#d62728" name="/drone1/desired_control_position/position[1]"/>
          <curve color="#bcbd22" name="/drone1/fmu/filter/state/pose/pose/position/y"/>
         </plot>
        </DockArea>
       </DockSplitter>
-      <DockSplitter orientation="-" count="2" sizes="0.500852;0.499148">
+      <DockSplitter orientation="-" count="2" sizes="0.5;0.5">
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="0.040641" left="447.688014" bottom="-1.482946" right="527.945151"/>
+         <range top="-0.524842" left="2623.608358" bottom="-1.248251" right="2655.526928"/>
          <limitY/>
          <curve color="#1ac938" name="/drone1/desired_control_position/position[2]"/>
          <curve color="#1f77b4" name="/drone1/fmu/filter/state/pose/pose/position/z"/>
@@ -34,7 +34,7 @@
        </DockArea>
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="1.617984" left="447.688014" bottom="-0.020178" right="527.945151"/>
+         <range top="1.621126" left="2623.608358" bottom="-0.020003" right="2655.526928"/>
          <limitY/>
          <curve color="#bcbd22" name="/drone1/position_error/data"/>
         </plot>
@@ -47,11 +47,11 @@
   <Tab tab_name="Drone 2" containers="1">
    <Container>
     <DockSplitter orientation="-" count="1" sizes="1">
-     <DockSplitter orientation="|" count="2" sizes="0.500885;0.499115">
-      <DockSplitter orientation="-" count="2" sizes="0.500852;0.499148">
+     <DockSplitter orientation="|" count="2" sizes="0.501046;0.498954">
+      <DockSplitter orientation="-" count="2" sizes="0.500805;0.499195">
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="0.791860" left="447.688090" bottom="-0.966273" right="527.945002"/>
+         <range top="0.788219" left="2623.608405" bottom="-0.816979" right="2655.526604"/>
          <limitY/>
          <curve color="#ff7f0e" name="/drone2/desired_control_position/position[0]"/>
          <curve color="#d62728" name="/drone2/fmu/filter/state/pose/pose/position/x"/>
@@ -59,17 +59,17 @@
        </DockArea>
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="0.809418" left="447.688090" bottom="-1.673764" right="527.945002"/>
+         <range top="0.796485" left="2623.608405" bottom="-1.106765" right="2655.526604"/>
          <limitY/>
          <curve color="#f14cc1" name="/drone2/desired_control_position/position[1]"/>
          <curve color="#1ac938" name="/drone2/fmu/filter/state/pose/pose/position/y"/>
         </plot>
        </DockArea>
       </DockSplitter>
-      <DockSplitter orientation="-" count="3" sizes="0.332765;0.334471;0.332765">
+      <DockSplitter orientation="-" count="3" sizes="0.333602;0.332796;0.333602">
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="0.009417" left="447.688090" bottom="-1.107247" right="527.945002"/>
+         <range top="-0.151330" left="2623.608405" bottom="-0.927156" right="2655.526604"/>
          <limitY/>
          <curve color="#9467bd" name="/drone2/desired_control_position/position[2]"/>
          <curve color="#ff7f0e" name="/drone2/fmu/filter/state/pose/pose/position/z"/>
@@ -77,14 +77,14 @@
        </DockArea>
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="1.795184" left="447.688090" bottom="-0.011796" right="527.945002"/>
+         <range top="1.030363" left="2623.608405" bottom="0.018902" right="2655.526604"/>
          <limitY/>
          <curve color="#17becf" name="/drone2/position_error/data"/>
         </plot>
        </DockArea>
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="4.983848" left="447.688090" bottom="-6.597808" right="527.945002"/>
+         <range top="0.941895" left="2623.608405" bottom="-2.055571" right="2655.526604"/>
          <limitY/>
          <curve color="#1f77b4" name="/drone2/collision_avoidance_force/position[0]"/>
          <curve color="#d62728" name="/drone2/collision_avoidance_force/position[1]"/>
@@ -99,11 +99,11 @@
   <Tab tab_name="Drone 3" containers="1">
    <Container>
     <DockSplitter orientation="-" count="1" sizes="1">
-     <DockSplitter orientation="|" count="2" sizes="0.500885;0.499115">
-      <DockSplitter orientation="-" count="2" sizes="0.500852;0.499148">
+     <DockSplitter orientation="|" count="2" sizes="0.501046;0.498954">
+      <DockSplitter orientation="-" count="2" sizes="0.500805;0.499195">
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="1.582974" left="447.688173" bottom="-1.743657" right="527.945369"/>
+         <range top="1.577398" left="2623.604100" bottom="-1.673316" right="2655.526424"/>
          <limitY/>
          <curve color="#1f77b4" name="/drone3/desired_control_position/position[0]"/>
          <curve color="#ff7f0e" name="/drone3/fmu/filter/state/pose/pose/position/x"/>
@@ -111,17 +111,17 @@
        </DockArea>
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="1.649640" left="447.688173" bottom="-1.819797" right="527.945369"/>
+         <range top="1.662591" left="2623.604100" bottom="-1.644034" right="2655.526424"/>
          <limitY/>
          <curve color="#d62728" name="/drone3/desired_control_position/position[1]"/>
          <curve color="#f14cc1" name="/drone3/fmu/filter/state/pose/pose/position/y"/>
         </plot>
        </DockArea>
       </DockSplitter>
-      <DockSplitter orientation="-" count="3" sizes="0.332765;0.334471;0.332765">
+      <DockSplitter orientation="-" count="3" sizes="0.333602;0.332796;0.333602">
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="0.009629" left="447.688173" bottom="-1.108842" right="527.945369"/>
+         <range top="-0.325702" left="2623.604100" bottom="-0.919270" right="2655.526424"/>
          <limitY/>
          <curve color="#1ac938" name="/drone3/desired_control_position/position[2]"/>
          <curve color="#9467bd" name="/drone3/fmu/filter/state/pose/pose/position/z"/>
@@ -129,14 +129,14 @@
        </DockArea>
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="1.222826" left="447.688173" bottom="0.022741" right="527.945369"/>
+         <range top="0.757876" left="2623.604100" bottom="0.041928" right="2655.526424"/>
          <limitY/>
          <curve color="#17becf" name="/drone3/position_error/data"/>
         </plot>
        </DockArea>
        <DockArea name="...">
         <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-         <range top="1.857072" left="447.688173" bottom="-2.059665" right="527.945369"/>
+         <range top="0.160327" left="2623.604100" bottom="-0.302565" right="2655.526424"/>
          <limitY/>
          <curve color="#ff7f0e" name="/drone3/collision_avoidance_force/position[0]"/>
          <curve color="#f14cc1" name="/drone3/collision_avoidance_force/position[1]"/>
@@ -153,7 +153,7 @@
     <DockSplitter orientation="-" count="1" sizes="1">
      <DockArea name="...">
       <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
-       <range top="54.138248" left="475.139250" bottom="-1.289455" right="527.933588"/>
+       <range top="28.016023" left="2628.217162" bottom="-0.652279" right="2655.526940"/>
        <limitY/>
        <curve color="#f14cc1" name="/drone1/total_time/data"/>
        <curve color="#9467bd" name="/drone2/total_time/data"/>
@@ -162,7 +162,7 @@
     </DockSplitter>
    </Container>
   </Tab>
-  <currentTabIndex index="2"/>
+  <currentTabIndex index="0"/>
  </tabbed_widget>
  <use_relative_time_offset enabled="1"/>
  <!-- - - - - - - - - - - - - - - -->

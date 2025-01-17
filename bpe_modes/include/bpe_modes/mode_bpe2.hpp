@@ -51,6 +51,15 @@ protected:
     double Ko_{0.0};
     double r_{0.0};
 
+    // Trajectory parameters
+    double z_min_{0.0};
+    double z_max_{0.0};
+    double A_offset_{0.0};
+    double frequency_{0.0};
+    double A_min_{0.0};
+    double leader_z_min_{0.0};
+    double leader_z_max_{0.0};
+
     // Adjacency matrix
     const static size_t n_agents_{3};
     Eigen::Matrix3i aij_{Eigen::Matrix3i::Zero()};

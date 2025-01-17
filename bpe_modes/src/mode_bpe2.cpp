@@ -60,6 +60,23 @@ void BpeMode2::initialize() {
         r_  = node_->get_parameter("autopilot.BpeMode2.gains.avoidance.r").as_double();
     }
 
+    // Initialize the trajectory parameters
+    node_->declare_parameter<double>("autopilot.BpeMode2.trajectory.z_min", 0.0);
+    node_->declare_parameter<double>("autopilot.BpeMode2.trajectory.z_max", 0.0);
+    node_->declare_parameter<double>("autopilot.BpeMode2.trajectory.A_offset", 0.0);
+    node_->declare_parameter<double>("autopilot.BpeMode2.trajectory.frequency", 0.0);
+    node_->declare_parameter<double>("autopilot.BpeMode2.trajectory.A_min", 0.0);
+    node_->declare_parameter<double>("autopilot.BpeMode2.trajectory.leader.z_min", 0.0);
+    node_->declare_parameter<double>("autopilot.BpeMode2.trajectory.leader.z_max", 0.0);
+
+    z_min_ = node_->get_parameter("autopilot.BpeMode2.trajectory.z_min").as_double();
+    z_max_ = node_->get_parameter("autopilot.BpeMode2.trajectory.z_max").as_double();
+    A_offset_ = node_->get_parameter("autopilot.BpeMode2.trajectory.A_offset").as_double();
+    frequency_ = node_->get_parameter("autopilot.BpeMode2.trajectory.frequency").as_double();
+    A_min_ = node_->get_parameter("autopilot.BpeMode2.trajectory.A_min").as_double();
+    leader_z_min_ = node_->get_parameter("autopilot.BpeMode2.trajectory.leader.z_min").as_double();
+    leader_z_max_ = node_->get_parameter("autopilot.BpeMode2.trajectory.leader.z_max").as_double();
+
     // --------------------------------------------------------------
     // Initialize the ROS 2 publisher for the statistics
     // --------------------------------------------------------------
@@ -180,7 +197,15 @@ void BpeMode2::update(double dt) {
     attitude[1] = Pegasus::Rotations::rad_to_deg(atan2(Rde3[0]*cos(yaw_des)+Rde3[1]*sin(yaw_des), Rde3[2]));
     attitude[2] = Pegasus::Rotations::rad_to_deg(yaw_des);
 
-    this->controller_->set_attitude(attitude, thrust, dt);
+    // Compute the desired attitude-rate in case of attitude-rate control
+    Eigen::Vector3d attitude_rate;
+    attitude_rate = R.transpose() * (-Kr_ * Rde3.cross(R.col(2)) - (mass_ / thrust) * Rde3.cross((Eigen::Matrix3d::Identity() - Rde3 * Rde3.transpose()) * jdes_[id]));
+
+    // Convert the desired attitude-rate to degrees
+    attitude_rate = Pegasus::Rotations::rad_to_deg(attitude_rate);
+
+    //this->controller_->set_attitude(attitude, thrust, dt);
+    this->controller_->set_attitude_rate(attitude_rate, thrust, dt);
 
     // Increment the total time elapsed
     total_time_ += dt;
@@ -195,6 +220,24 @@ void BpeMode2::update(double dt) {
 
     position_error_msg_.data = (P_[id] - pdes_[id]).norm();
     position_error_publisher_->publish(position_error_msg_);
+
+    // Set the attitude control message
+    desired_attitude_msg_.attitude[0] = attitude[0];
+    desired_attitude_msg_.attitude[1] = attitude[1];
+    desired_attitude_msg_.attitude[2] = attitude[2];
+    desired_attitude_msg_.thrust = thrust;
+
+    // Publish the attitude control message for the controller to track
+    desired_attitude_publisher_->publish(desired_attitude_msg_);
+
+    // Set the attitude rate control message
+    desired_attitude_rate_msg_.attitude[0] = attitude_rate[0];
+    desired_attitude_rate_msg_.attitude[1] = attitude_rate[1];
+    desired_attitude_rate_msg_.attitude[2] = attitude_rate[2];
+    desired_attitude_rate_msg_.thrust = thrust;
+
+    // Publish the position control message for the controller to track
+    desired_attitude_rate_publisher_->publish(desired_attitude_rate_msg_);
 
     total_time_msg_.data = total_time_;
     total_time_publisher_->publish(total_time_msg_);
@@ -255,21 +298,13 @@ void BpeMode2::initialize_trajectory() {
 
 void BpeMode2::trajectory_generation(double dt) {
 
-    double z_min_ = -0.5;
-    double z_max_ = -2.0;
-    double A_offset_ = 0.75;
-    double frequency_ = 0.25;  // 0.2 worked really well - maybe it is just that more PE is needed
-
     // Get the desired trajectory for each agent
     double A, Adot, z, zdot;
     double omega = M_PI * 2 * frequency_;
     double t1{30};
     double t2{80};
     double t3{130};
-
     double t = total_time_;
-
-    double A_min = 0.25;
 
     for (size_t i = 0; i < n_agents_; i++) {
 
@@ -285,11 +320,8 @@ void BpeMode2::trajectory_generation(double dt) {
         if (i==0) {
             A = 0.0;
             Adot = 0;
-            double min = -1.0;
-            double max = -2.1;
-            z = min + ((max-min)/t3)*t;
+            z = leader_z_min_ + ((leader_z_max_-leader_z_min_)/t3)*t;
             zdot = 0;
-
         // Trajectory for the follower drones
         } else {
             if (t < t1) {
@@ -300,15 +332,15 @@ void BpeMode2::trajectory_generation(double dt) {
             } else if (t1 < t && t < t2) {
                 //A = double(i)*A_offset_*(1 - alpha*(t - t1) / (t2 - t1));
                 //Adot = -double(i)*A_offset_*alpha/(t2 - t1);
-                A = double(i)*A_offset_ + ((A_min*double(i) - double(i)*A_offset_)*(t-t1)/(t2-t1));
-                Adot = (A_min*double(i) - double(i)*A_offset_)/(t2-t1);
+                A = double(i)*A_offset_ + ((A_min_*double(i) - double(i)*A_offset_)*(t-t1)/(t2-t1));
+                Adot = (A_min_*double(i) - double(i)*A_offset_)/(t2-t1);
                 z = z_min_ + (z_max_ - z_min_) / 2 * (t - t1) / (t2 - t1);
                 zdot = (z_max_ - z_min_) / 2 / (t2 - t1);
             } else if (t2 < t && t < t3) {
                 // A = double(i)*A_offset_*(alpha + alpha*(t - t2) / (t3 - t2));
                 // Adot = double(i)*A_offset_*alpha/(t3 - t2);
-                A = double(i)*A_min + ((double(i)*A_offset_ - A_min*double(i))*(t-t2)/(t3-t2));
-                Adot = (double(i)*A_offset_ - A_min*double(i))/(t3-t2);
+                A = double(i)*A_min_ + ((double(i)*A_offset_ - A_min_*double(i))*(t-t2)/(t3-t2));
+                Adot = (double(i)*A_offset_ - A_min_*double(i))/(t3-t2);
                 z = (z_max_ + z_min_) / 2 + (z_max_ - z_min_) / 2 * (t - t2) / (t3 - t2);
                 zdot = (z_max_ - z_min_) / 2 / (t3 - t2);
             } else {

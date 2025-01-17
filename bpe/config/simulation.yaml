@@ -86,7 +86,7 @@
       # ---------------------------------------------------------------------------------------------------------
       default_mode: "DisarmMode"
       # Define all the existing operation modes
-      modes: ["DisarmMode", "ArmMode", "TakeoffMode", "LandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode2"]
+      modes: ["DisarmMode", "ArmMode", "TakeoffMode", "LandMode", "HoldMode", "WaypointMode", "BpeMode2"]
       # Configurations of each operating mode:
       # 1) Define the valid transitions from a given operation mode to other operation modes
       # 2) Fallback mode if something goes wrong
@@ -100,14 +100,23 @@
           leader:
             Kp: 7.0
             Kv: 6.5
-            Kr: 3.0
+            Kr: 5.0
           followers:
             Kp: 3.5
             Kv: 5.0
-            Kr: 3.0
+            Kr: 5.0
           avoidance:
-            Ko: 0.6
+            Ko: 0.4
             r: 0.10
+        trajectory:
+          z_min: -0.5
+          z_max: -2.0
+          A_offset: 0.75
+          frequency: 0.25
+          A_min: 0.25
+          leader:
+            z_min: -1.0
+            z_max: -2.1
         statistics_publisher: "bpe/statistics"
       DisarmMode: 
         valid_transitions: ["ArmMode"]
@@ -124,7 +133,7 @@
         fallback: "HoldMode"
         on_finish: "HoldMode"
         geofencing_violation_fallback: "HoldMode"
-        takeoff_altitude: -1.0 # m (NED)
+        takeoff_altitude: -0.5 # m (NED)
         set_takeoff_altitude_service: "autopilot/set_takeoff"
       LandMode: 
         valid_transitions: ["DisarmMode", "ArmMode", "TakeoffMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode"]
@@ -142,15 +151,6 @@
         on_finish: "HoldMode"
         geofencing_violation_fallback: "HoldMode"
         set_waypoint_service: "autopilot/set_waypoint"
-      FollowTrajectoryMode: 
-        valid_transitions: ["LandMode", "HoldMode", "WaypointMode", "PassThroughMode", "BpeMode", "BpeMode2"]
-        fallback: "HoldMode"
-        geofencing_violation_fallback: "HoldMode"
-        on_finish: "HoldMode"
-      PassThroughMode: 
-        valid_transitions: ["DisarmMode", "ArmMode", "TakeoffMode", "LandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "BpeMode", "BpeMode2"]
-        fallback: "HoldMode"
-        geofencing_violation_fallback: "HoldMode"
       # Topics configurations
       publishers:
         control_position: "fmu/in/position"
