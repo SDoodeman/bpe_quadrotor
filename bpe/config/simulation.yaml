@@ -95,7 +95,7 @@
         valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
         fallback: "HoldMode"
         on_finish: "HoldMode"
-        drone_ids: [1, 2, 3]  # First drone is leader, second drone is the first follower, and third is the second follower
+        drone_ids: [7,8,9]  # First drone is leader, second drone is the first follower, and third is the second follower
         gains:
           leader:
             Kp: 7.0
