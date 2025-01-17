@@ -86,11 +86,29 @@
       # ---------------------------------------------------------------------------------------------------------
       default_mode: "DisarmMode"
       # Define all the existing operation modes
-      modes: ["DisarmMode", "ArmMode", "TakeoffMode", "LandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode2"]
+      modes: ["DisarmMode", "ArmMode", "TakeoffMode", "LandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode", "BpeMode2"]
       # Configurations of each operating mode:
       # 1) Define the valid transitions from a given operation mode to other operation modes
       # 2) Fallback mode if something goes wrong
       # 3) Other specific operating mode configuration
+      BpeMode:
+        valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
+        fallback: "HoldMode"
+        on_finish: "HoldMode"
+        drone_ids: [1, 2, 3]  # First drone is leader, second drone is the first follower, and third is the second follower
+        gains:
+          leader:
+            Kp: 7.0
+            Kv: 6.5
+            Kr: 3.0
+          followers:
+            Kp: 3.5
+            Kv: 5.0
+            Kr: 3.0
+          avoidance:
+            Ko: 0.6
+            r: 0.10
+        statistics_publisher: "bpe/statistics"
       BpeMode2:
         valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
         fallback: "HoldMode"
