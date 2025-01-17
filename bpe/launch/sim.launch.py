@@ -15,7 +15,7 @@ def generate_launch_description():
 
     # Launch an empty world in gazebo
     gazebo_launch_file = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/worlds/empty.launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/worlds/taguspark.launch.py')),
         launch_arguments={
             'gui': 'true',
             }.items())

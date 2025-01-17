@@ -236,7 +236,7 @@ void BpeMode2::trajectory_generation(double dt) {
 
     double z_min_ = -0.5;
     double z_max_ = -2.0;
-    double A_offset_ = 0.55;
+    double A_offset_ = 0.75;
     double frequency_ = 0.25;  // 0.2 worked really well - maybe it is just that more PE is needed
 
     // Get the desired trajectory for each agent
@@ -248,7 +248,7 @@ void BpeMode2::trajectory_generation(double dt) {
 
     double t = total_time_;
 
-    double A_min = 0.30;
+    double A_min = 0.25;
 
     for (size_t i = 0; i < n_agents_; i++) {
 
@@ -262,10 +262,18 @@ void BpeMode2::trajectory_generation(double dt) {
 
         // Trajectory for the leader drone
         if (i==0) {
-                A = 1.5;
-                Adot = 0;
-                z = (z_min_ + z_max_) / 2;
-                zdot = 0;
+            // A = 1.5;
+            // Adot = 0;
+            // z = (z_min_ + z_max_) / 2;
+            // zdot = 0;
+
+            A = 0.0;
+            Adot = 0;
+            double min = -1.0;
+            double max = -2.1;
+            z = min + ((max-min)/t3)*t;
+            zdot = 0;
+
         // Trajectory for the follower drones
         } else {
             if (t < t1) {

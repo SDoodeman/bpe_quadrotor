@@ -106,7 +106,7 @@ def main(args=None):
         drones[i].set_autopilot_mode('BpeMode2')
 
     # Land the drone
-    time.sleep(300)
+    time.sleep(150)
     for i in range(n_drones):
         drones[i].set_autopilot_mode('LandMode')
 
