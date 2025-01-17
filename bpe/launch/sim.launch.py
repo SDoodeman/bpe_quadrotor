@@ -17,7 +17,7 @@ def generate_launch_description():
     gazebo_launch_file = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/worlds/empty.launch.py')),
         launch_arguments={
-            'gui': 'true',
+            'gui': 'false',
             }.items())
     
     iris_launch_file = IncludeLaunchDescription(

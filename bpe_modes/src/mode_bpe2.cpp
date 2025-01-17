@@ -230,109 +230,92 @@ void BpeMode2::initialize_trajectory() {
         udes_[i] = Eigen::Vector3d::Zero();
         jdes_[i] = Eigen::Vector3d::Zero();
     }
-
-    // Define the initial position for the leader drone to start at
-    pdes_[0][0] = -3.0;
-    pdes_[0][1] =  0.0;
-    pdes_[0][2] = -1.2;
 }
 
 void BpeMode2::trajectory_generation(double dt) {
 
-    double leader_velocity_x = 6.0 / 120.0;
-    pdes_[0][0] += leader_velocity_x * dt;
+    double z_min_ = -0.5;
+    double z_max_ = -2.0;
+    double A_offset_ = 0.55;
+    double frequency_ = 0.06;
 
-    double radius_x = 0.6;
-    double radius_y = 0.6;
+    // Get the desired trajectory for each agent
+    double A, Adot, z, zdot;
+    double omega = M_PI * 2 * frequency_;
+    double t1{30};
+    double t2{80};
+    double t3{130};
 
-    double f = 0.10;
+    double t = total_time_;
 
-    // Define the desired position for the first follower
-    pdes_[1][0] = pdes_[0][0] - 0.20;
-    pdes_[1][1] = radius_y * cos(2*M_PI*f*total_time_);
-    pdes_[1][2] = pdes_[0][2] + radius_x * sin(2*M_PI*f*total_time_);
+    double A_min = 0.40;
 
-    // Define the desired velocity for the first follower
-    vdes_[1][0] = leader_velocity_x;
-    vdes_[1][1] = -radius_y * 2*M_PI*f*sin(2*M_PI*f*total_time_);
-    vdes_[1][2] =  radius_x * 2*M_PI*f*cos(2*M_PI*f*total_time_);
+    for (size_t i = 0; i < n_agents_; i++) {
 
-    // Define the desired acceleration for the first follower
-    udes_[1][0] = 0.0;
-    udes_[1][1] = -radius_y * std::pow(2*M_PI*f,2)*cos(2*M_PI*f*total_time_);
-    udes_[1][2] = -radius_x * std::pow(2*M_PI*f,2)*sin(2*M_PI*f*total_time_);
+        // This trajectory will start with wide circles (i*A_offset_) at a height of z_min.
+        // From t=t1 to t=t2, the drones will start to move up and reduce the circle radius,
+        //   which is at its smallest at t2 (half of the original), at which the height is
+        //   in between z_min and z_max.
+        // From t=t2 to t=t3, the drones continue to move up, but increase the circle radius,
+        //   until the circles are at (i*A_offset_) again, at a height of z_max at t3.
+        // After t3, the circles will stay at (i*A_offset_) at a height of z_max.
 
-    // -------------------------------------------------------------------------------
+        // Trajectory for the leader drone
+        if (i==0) {
+                A = 1.5;
+                Adot = 0;
+                z = (z_min_ + z_max_) / 2;
+                zdot = 0;
+        // Trajectory for the follower drones
+        } else {
+            if (t < t1) {
+                A = double(i)*A_offset_;
+                Adot = 0;
+                z = z_min_;
+                zdot = 0;
+            } else if (t1 < t && t < t2) {
+                //A = double(i)*A_offset_*(1 - alpha*(t - t1) / (t2 - t1));
+                //Adot = -double(i)*A_offset_*alpha/(t2 - t1);
+                A = double(i)*A_offset_ + ((A_min*double(i) - double(i)*A_offset_)*(t-t1)/(t2-t1));
+                Adot = (A_min*double(i) - double(i)*A_offset_)/(t2-t1);
+                z = z_min_ + (z_max_ - z_min_) / 2 * (t - t1) / (t2 - t1);
+                zdot = (z_max_ - z_min_) / 2 / (t2 - t1);
+            } else if (t2 < t && t < t3) {
+                // A = double(i)*A_offset_*(alpha + alpha*(t - t2) / (t3 - t2));
+                // Adot = double(i)*A_offset_*alpha/(t3 - t2);
+                A = double(i)*A_min + ((double(i)*A_offset_ - A_min*double(i))*(t-t2)/(t3-t2));
+                Adot = (double(i)*A_offset_ - A_min*double(i))/(t3-t2);
+                z = (z_max_ + z_min_) / 2 + (z_max_ - z_min_) / 2 * (t - t2) / (t3 - t2);
+                zdot = (z_max_ - z_min_) / 2 / (t3 - t2);
+            } else {
+                A = double(i)*A_offset_;
+                Adot = 0;
+                z = z_max_;
+                zdot = 0;
+            }
+        }
 
-    double offset = M_PI;
+        // Compute the desired position
+        pdes_[i][0] = A*sin(omega*t - i*M_PI/2);
+        pdes_[i][1] = A*cos(omega*t - i*M_PI/2);
+        pdes_[i][2] = z;
 
-    // Define the desired position of the second follower
-    pdes_[2][0] = pdes_[0][0] + 0.20;
-    pdes_[2][1] = radius_y * cos(2*M_PI*f*total_time_ + offset);
-    pdes_[2][2] = pdes_[0][2] + radius_x * sin(2*M_PI*f*total_time_ + offset);
+        // Compute the desired velocity
+        vdes_[i][0] =  omega*A*cos(omega*t - i*M_PI/2) + Adot*sin(omega*t - i*M_PI/2);
+        vdes_[i][1] = -omega*A*sin(omega*t - i*M_PI/2) + Adot*cos(omega*t - i*M_PI/2);
+        vdes_[i][2] =  zdot;
 
-    // Define the desired velocity for the first follower
-    vdes_[2][0] = leader_velocity_x;
-    vdes_[2][1] = -radius_y * 2*M_PI*f*sin(2*M_PI*f*total_time_ + offset);
-    vdes_[2][2] =  radius_x * 2*M_PI*f*cos(2*M_PI*f*total_time_ + offset);
-
-    // Define the desired acceleration for the first follower
-    udes_[2][0] = 0.0;
-    udes_[2][1] = -radius_y * std::pow(2*M_PI*f,2)*cos(2*M_PI*f*total_time_ + offset);
-    udes_[2][2] = -radius_x * std::pow(2*M_PI*f,2)*sin(2*M_PI*f*total_time_ + offset);
-}
-
-} // namespace autopilot
-
-
-// statistics_msg_.header.stamp = node_->now();
-//     statistics_msg_.drone_id = drone_id_;
-//     statistics_msg_.total_time = total_time_;
-//     // Update the desired trajectory
-//     for(int i=0; i < 3; i++) {
-//         statistics_msg_.pdes0[i] = pdes_[0][i];
-//         statistics_msg_.pdes1[i] = pdes_[1][i];
-//         statistics_msg_.pdes2[i] = pdes_[2][i];
-
-//         statistics_msg_.vdes0[i] = vdes_[0][i];
-//         statistics_msg_.vdes1[i] = vdes_[1][i];
-//         statistics_msg_.vdes2[i] = vdes_[2][i];
-
-//         statistics_msg_.udes0[i] = udes_[0][i];
-//         statistics_msg_.udes1[i] = udes_[1][i];
-//         statistics_msg_.udes2[i] = udes_[2][i];
-
-//         statistics_msg_.jdes0[i] = jdes_[0][i];
-//         statistics_msg_.jdes1[i] = jdes_[1][i];
-//         statistics_msg_.jdes2[i] = jdes_[2][i];
-
-//         // Update the state of the leader and followers position and velocity
-//         statistics_msg_.p0[i] = P_[0][i];
-//         statistics_msg_.p1[i] = P_[1][i];
-//         statistics_msg_.p2[i] = P_[2][i];
-
-//         statistics_msg_.v0[i] = V_[0][i];
-//         statistics_msg_.v1[i] = V_[1][i];
-//         statistics_msg_.v2[i] = V_[2][i];
-
-//         // Update the position and velocity errors
-//         statistics_msg_.pos_error[i] = P_[id][i] - pdes_[id][i];
-//         statistics_msg_.vel_error[i] = V_[id][i] - vdes_[id][i];
-    
-//         // Update the desired acceleration reference
-//         statistics_msg_.desired_acceleration[i] = u[0];
-//         statistics_msg_.desired_acceleration[i] = u[1];
-//         statistics_msg_.desired_acceleration[i] = u[2];
-
-//         // Update the thrust reference
-//         statistics_msg_.thrust_reference = thrust;
-
-//         // Update the desired roll, pitch and yaw angles
-//         statistics_msg_.desired_roll = attitude[0];
-//         statistics_msg_.desired_pitch = attitude[1];
-//         statistics_msg_.desired_yaw = attitude[2];
-//     }
-//     statistics_publisher_->publish(statistics_msg_);
+        // Compute the desired acceleration
+        udes_[i][0] = -std::pow(omega,2)*A*sin(omega*t - i*M_PI/2) + 2*omega*Adot*cos(omega*t - i*M_PI/2);
+        udes_[i][1] = -std::pow(omega,2)*A*cos(omega*t - i*M_PI/2) - 2*omega*Adot*sin(omega*t - i*M_PI/2);
+        udes_[i][2] =  0.0;
+        
+        // Compute the desired jerk
+        jdes_[i][0] = -std::pow(omega,3)*A*cos(omega*t - i*M_PI/2) - 3*std::pow(omega,2)*Adot*sin(omega*t - i*M_PI/2);
+        jdes_[i][1] =  std::pow(omega,3)*A*sin(omega*t - i*M_PI/2) - 3*std::pow(omega,2)*Adot*cos(omega*t - i*M_PI/2);
+        jdes_[i][2] =  0.0;
+    }
+}} // namespace autopilot
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(autopilot::BpeMode2, autopilot::Mode)
