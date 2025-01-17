@@ -86,7 +86,7 @@
       # ---------------------------------------------------------------------------------------------------------
       default_mode: "DisarmMode"
       # Define all the existing operation modes
-      modes: ["DisarmMode", "ArmMode", "TakeoffMode", "LandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode", "BpeMode2"]
+      modes: ["DisarmMode", "ArmMode", "TakeoffMode", "LandMode", "HoldMode", "WaypointMode", "FollowTrajectoryMode", "PassThroughMode", "BpeMode2"]
       # Configurations of each operating mode:
       # 1) Define the valid transitions from a given operation mode to other operation modes
       # 2) Fallback mode if something goes wrong
@@ -105,31 +105,10 @@
             Kp: 3.5
             Kv: 5.0
             Kr: 3.0
+          avoidance:
+            Ko: 0.6
+            r: 0.10
         statistics_publisher: "bpe/statistics"
-      BpeMode:
-        valid_transitions: ["HoldMode", "WaypointMode", "LandMode"]
-        fallback: "HoldMode"
-        on_finish: "HoldMode"
-        first_drone_id: 1
-        follower_1: 2   # ID of the first drone follower
-        follower_2: 3   # ID of the second drone follower
-        gains:
-          leader:
-            Kp: 7.0     # Proportional term to the trajectory
-            Kv: 5.5     # Derivative term to the trajectory
-            Kr: 3.5     # Atittude term
-          followers:
-            Kp: 4.0     # Proportional term of the relative bearing error
-            Kv: 3.0     # Derivative term to the trajectory (velocity feedback gain)
-            Kr: 3.5     # Atittude term
-            Ko: 1.5     # Collision avoidance gain
-        trajectory:
-          z_min: -0.5       # The height of the circles
-          z_max: -2.0       # The height of the circles
-          A_offset: 0.55    # Circles amplitude offset
-          frequency: 0.1    # Frequency in Hz
-        avoidance:
-          r: 0.25           # Have less effect 
       DisarmMode: 
         valid_transitions: ["ArmMode"]
         fallback: "DisarmMode"

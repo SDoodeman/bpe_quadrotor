@@ -47,6 +47,10 @@ protected:
     double Kv_{0.0};
     double Kr_{0.0};
 
+    // Colision avoidance Gains
+    double Ko_{0.0};
+    double r_{0.0};
+
     // Adjacency matrix
     const static size_t n_agents_{3};
     Eigen::Matrix3i aij_{Eigen::Matrix3i::Zero()};
@@ -86,6 +90,7 @@ protected:
     pegasus_msgs::msg::ControlPosition desired_position_msg_;
     std_msgs::msg::Float64 position_error_msg_;
     std_msgs::msg::Float64 total_time_msg_;
+    pegasus_msgs::msg::ControlPosition collision_avoidance_force_msg_;
 
     // ROS2 publishers
     rclcpp::Publisher<pegasus_msgs::msg::ControlAttitude>::SharedPtr desired_attitude_publisher_;
@@ -93,5 +98,6 @@ protected:
     rclcpp::Publisher<pegasus_msgs::msg::ControlPosition>::SharedPtr desired_position_publisher_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr position_error_publisher_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr total_time_publisher_;
+    rclcpp::Publisher<pegasus_msgs::msg::ControlPosition>::SharedPtr collision_avoidance_force_publisher_;
 };
 }

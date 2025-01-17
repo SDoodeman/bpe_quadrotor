@@ -1,40 +1,40 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <root>
- <tabbed_widget parent="main_window" name="Main Window">
+ <tabbed_widget name="Main Window" parent="main_window">
   <Tab tab_name="Drone 1" containers="1">
    <Container>
     <DockSplitter orientation="-" count="1" sizes="1">
-     <DockSplitter orientation="|" count="2" sizes="0.500672;0.499328">
-      <DockSplitter orientation="-" count="2" sizes="0.500611;0.499389">
+     <DockSplitter orientation="|" count="2" sizes="0.500885;0.499115">
+      <DockSplitter orientation="-" count="2" sizes="0.500852;0.499148">
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.449184" bottom="-1.596324" top="1.575518" left="0.003999"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="0.009767" left="447.688014" bottom="-0.061513" right="527.945151"/>
          <limitY/>
          <curve color="#1f77b4" name="/drone1/desired_control_position/position[0]"/>
          <curve color="#17becf" name="/drone1/fmu/filter/state/pose/pose/position/x"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.449184" bottom="-1.575701" top="1.604161" left="0.003999"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="1.560364" left="447.688014" bottom="-0.066427" right="527.945151"/>
          <limitY/>
          <curve color="#d62728" name="/drone1/desired_control_position/position[1]"/>
          <curve color="#bcbd22" name="/drone1/fmu/filter/state/pose/pose/position/y"/>
         </plot>
        </DockArea>
       </DockSplitter>
-      <DockSplitter orientation="-" count="2" sizes="0.500611;0.499389">
+      <DockSplitter orientation="-" count="2" sizes="0.500852;0.499148">
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.449184" bottom="-1.280848" top="0.014768" left="0.003999"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="0.040641" left="447.688014" bottom="-1.482946" right="527.945151"/>
          <limitY/>
          <curve color="#1ac938" name="/drone1/desired_control_position/position[2]"/>
          <curve color="#1f77b4" name="/drone1/fmu/filter/state/pose/pose/position/z"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.449184" bottom="-0.010627" top="0.740916" left="0.003999"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="1.617984" left="447.688014" bottom="-0.020178" right="527.945151"/>
          <limitY/>
          <curve color="#bcbd22" name="/drone1/position_error/data"/>
         </plot>
@@ -47,39 +47,48 @@
   <Tab tab_name="Drone 2" containers="1">
    <Container>
     <DockSplitter orientation="-" count="1" sizes="1">
-     <DockSplitter orientation="|" count="2" sizes="0.500672;0.499328">
-      <DockSplitter orientation="-" count="2" sizes="0.500611;0.499389">
+     <DockSplitter orientation="|" count="2" sizes="0.500885;0.499115">
+      <DockSplitter orientation="-" count="2" sizes="0.500852;0.499148">
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.453223" bottom="-1.998578" top="1.499952" left="0.000000"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="0.791860" left="447.688090" bottom="-0.966273" right="527.945002"/>
          <limitY/>
          <curve color="#ff7f0e" name="/drone2/desired_control_position/position[0]"/>
          <curve color="#d62728" name="/drone2/fmu/filter/state/pose/pose/position/x"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.453223" bottom="-1.554071" top="1.496852" left="0.000000"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="0.809418" left="447.688090" bottom="-1.673764" right="527.945002"/>
          <limitY/>
          <curve color="#f14cc1" name="/drone2/desired_control_position/position[1]"/>
          <curve color="#1ac938" name="/drone2/fmu/filter/state/pose/pose/position/y"/>
         </plot>
        </DockArea>
       </DockSplitter>
-      <DockSplitter orientation="-" count="2" sizes="0.500611;0.499389">
+      <DockSplitter orientation="-" count="3" sizes="0.332765;0.334471;0.332765">
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.453223" bottom="-1.104562" top="0.011611" left="0.000000"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="0.009417" left="447.688090" bottom="-1.107247" right="527.945002"/>
          <limitY/>
          <curve color="#9467bd" name="/drone2/desired_control_position/position[2]"/>
          <curve color="#ff7f0e" name="/drone2/fmu/filter/state/pose/pose/position/z"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.453223" bottom="-0.005546" top="2.073390" left="0.000000"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="1.795184" left="447.688090" bottom="-0.011796" right="527.945002"/>
          <limitY/>
          <curve color="#17becf" name="/drone2/position_error/data"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="4.983848" left="447.688090" bottom="-6.597808" right="527.945002"/>
+         <limitY/>
+         <curve color="#1f77b4" name="/drone2/collision_avoidance_force/position[0]"/>
+         <curve color="#d62728" name="/drone2/collision_avoidance_force/position[1]"/>
+         <curve color="#1ac938" name="/drone2/collision_avoidance_force/position[2]"/>
         </plot>
        </DockArea>
       </DockSplitter>
@@ -90,39 +99,48 @@
   <Tab tab_name="Drone 3" containers="1">
    <Container>
     <DockSplitter orientation="-" count="1" sizes="1">
-     <DockSplitter orientation="|" count="2" sizes="0.500672;0.499328">
-      <DockSplitter orientation="-" count="2" sizes="0.500611;0.499389">
+     <DockSplitter orientation="|" count="2" sizes="0.500885;0.499115">
+      <DockSplitter orientation="-" count="2" sizes="0.500852;0.499148">
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.453497" bottom="-3.865020" top="3.087549" left="0.008004"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="1.582974" left="447.688173" bottom="-1.743657" right="527.945369"/>
          <limitY/>
          <curve color="#1f77b4" name="/drone3/desired_control_position/position[0]"/>
          <curve color="#ff7f0e" name="/drone3/fmu/filter/state/pose/pose/position/x"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.453497" bottom="-3.277278" top="3.175989" left="0.008004"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="1.649640" left="447.688173" bottom="-1.819797" right="527.945369"/>
          <limitY/>
          <curve color="#d62728" name="/drone3/desired_control_position/position[1]"/>
          <curve color="#f14cc1" name="/drone3/fmu/filter/state/pose/pose/position/y"/>
         </plot>
        </DockArea>
       </DockSplitter>
-      <DockSplitter orientation="-" count="2" sizes="0.500611;0.499389">
+      <DockSplitter orientation="-" count="3" sizes="0.332765;0.334471;0.332765">
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.453497" bottom="-1.100771" top="0.011001" left="0.008004"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="0.009629" left="447.688173" bottom="-1.108842" right="527.945369"/>
          <limitY/>
          <curve color="#1ac938" name="/drone3/desired_control_position/position[2]"/>
          <curve color="#9467bd" name="/drone3/fmu/filter/state/pose/pose/position/z"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-         <range right="79.453497" bottom="0.062209" top="2.895957" left="0.008004"/>
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="1.222826" left="447.688173" bottom="0.022741" right="527.945369"/>
          <limitY/>
          <curve color="#17becf" name="/drone3/position_error/data"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+         <range top="1.857072" left="447.688173" bottom="-2.059665" right="527.945369"/>
+         <limitY/>
+         <curve color="#ff7f0e" name="/drone3/collision_avoidance_force/position[0]"/>
+         <curve color="#f14cc1" name="/drone3/collision_avoidance_force/position[1]"/>
+         <curve color="#9467bd" name="/drone3/collision_avoidance_force/position[2]"/>
         </plot>
        </DockArea>
       </DockSplitter>
@@ -134,8 +152,8 @@
    <Container>
     <DockSplitter orientation="-" count="1" sizes="1">
      <DockArea name="...">
-      <plot style="Lines" flip_y="false" mode="TimeSeries" flip_x="false">
-       <range right="79.453264" bottom="-1.397737" top="58.579946" left="22.322591"/>
+      <plot flip_x="false" style="Lines" mode="TimeSeries" flip_y="false">
+       <range top="54.138248" left="475.139250" bottom="-1.289455" right="527.933588"/>
        <limitY/>
        <curve color="#f14cc1" name="/drone1/total_time/data"/>
        <curve color="#9467bd" name="/drone2/total_time/data"/>
@@ -151,7 +169,7 @@
  <!-- - - - - - - - - - - - - - - -->
  <Plugins>
   <plugin ID="DataLoad CSV">
-   <parameters time_axis="" delimiter="0"/>
+   <parameters delimiter="0" time_axis=""/>
   </plugin>
   <plugin ID="DataLoad MCAP"/>
   <plugin ID="DataLoad ROS2 bags">
@@ -169,7 +187,7 @@
    <max_array_size value="100"/>
    <boolean_strings_to_number value="true"/>
    <remove_suffix_from_strings value="true"/>
-   <selected_topics value="/clock;/drone1/autopilot/status;/drone1/bpe/statistics;/drone1/desired_control_attitude;/drone1/desired_control_attitude_rate;/drone1/desired_control_position;/drone1/fmu/constants;/drone1/fmu/filter/rpy;/drone1/fmu/filter/state;/drone1/fmu/in/force/attitude;/drone1/fmu/in/force/attitude_rate;/drone1/fmu/in/inertial_acceleration;/drone1/fmu/in/position;/drone1/fmu/in/throtle/attitude;/drone1/fmu/in/throtle/attitude_rate;/drone1/fmu/in/velocity/body;/drone1/fmu/in/velocity/inertial;/drone1/fmu/sensors/barometer;/drone1/fmu/sensors/gps;/drone1/fmu/sensors/gps_info;/drone1/fmu/sensors/imu;/drone1/fmu/status;/drone1/position_error;/drone1/simulator/state;/drone1/statistics/pid;/drone1/total_time;/drone2/autopilot/status;/drone2/bpe/statistics;/drone2/desired_control_attitude;/drone2/desired_control_attitude_rate;/drone2/desired_control_position;/drone2/fmu/constants;/drone2/fmu/filter/rpy;/drone2/fmu/filter/state;/drone2/fmu/in/force/attitude;/drone2/fmu/in/force/attitude_rate;/drone2/fmu/in/inertial_acceleration;/drone2/fmu/in/position;/drone2/fmu/in/throtle/attitude;/drone2/fmu/in/throtle/attitude_rate;/drone2/fmu/in/velocity/body;/drone2/fmu/in/velocity/inertial;/drone2/fmu/sensors/barometer;/drone2/fmu/sensors/gps;/drone2/fmu/sensors/gps_info;/drone2/fmu/sensors/imu;/drone2/fmu/status;/drone2/position_error;/drone2/simulator/state;/drone2/statistics/pid;/drone2/total_time;/drone3/autopilot/status;/drone3/bpe/statistics;/drone3/desired_control_attitude;/drone3/desired_control_attitude_rate;/drone3/desired_control_position;/drone3/fmu/constants;/drone3/fmu/filter/rpy;/drone3/fmu/filter/state;/drone3/fmu/in/force/attitude;/drone3/fmu/in/force/attitude_rate;/drone3/fmu/in/inertial_acceleration;/drone3/fmu/in/position;/drone3/fmu/in/throtle/attitude;/drone3/fmu/in/throtle/attitude_rate;/drone3/fmu/in/velocity/body;/drone3/fmu/in/velocity/inertial;/drone3/fmu/sensors/barometer;/drone3/fmu/sensors/gps;/drone3/fmu/sensors/gps_info;/drone3/fmu/sensors/imu;/drone3/fmu/status;/drone3/position_error;/drone3/simulator/state;/drone3/statistics/pid;/drone3/total_time;/mocap/pose_enu/drone1;/mocap/pose_enu/drone2;/mocap/pose_enu/drone3;/parameter_events;/performance_metrics;/rosout"/>
+   <selected_topics value="/clock;/drone1/autopilot/status;/drone1/bpe/statistics;/drone1/desired_control_attitude;/drone1/desired_control_attitude_rate;/drone1/desired_control_position;/drone1/fmu/constants;/drone1/fmu/filter/rpy;/drone1/fmu/filter/state;/drone1/fmu/in/force/attitude;/drone1/fmu/in/force/attitude_rate;/drone1/fmu/in/inertial_acceleration;/drone1/fmu/in/position;/drone1/fmu/in/throtle/attitude;/drone1/fmu/in/throtle/attitude_rate;/drone1/fmu/in/velocity/body;/drone1/fmu/in/velocity/inertial;/drone1/fmu/sensors/barometer;/drone1/fmu/sensors/gps;/drone1/fmu/sensors/gps_info;/drone1/fmu/sensors/imu;/drone1/fmu/status;/drone1/position_error;/drone1/simulator/state;/drone1/statistics/pid;/drone1/total_time;/drone2/autopilot/status;/drone2/bpe/statistics;/drone2/desired_control_attitude;/drone2/desired_control_attitude_rate;/drone2/desired_control_position;/drone2/fmu/constants;/drone2/fmu/filter/rpy;/drone2/fmu/filter/state;/drone2/fmu/in/force/attitude;/drone2/fmu/in/force/attitude_rate;/drone2/fmu/in/inertial_acceleration;/drone2/fmu/in/position;/drone2/fmu/in/throtle/attitude;/drone2/fmu/in/throtle/attitude_rate;/drone2/fmu/in/velocity/body;/drone2/fmu/in/velocity/inertial;/drone2/fmu/sensors/barometer;/drone2/fmu/sensors/gps;/drone2/fmu/sensors/gps_info;/drone2/fmu/sensors/imu;/drone2/fmu/status;/drone2/position_error;/drone2/simulator/state;/drone2/statistics/pid;/drone2/total_time;/drone3/autopilot/status;/drone3/bpe/statistics;/drone3/desired_control_attitude;/drone3/desired_control_attitude_rate;/drone3/desired_control_position;/drone3/fmu/constants;/drone3/fmu/filter/rpy;/drone3/fmu/filter/state;/drone3/fmu/in/force/attitude;/drone3/fmu/in/force/attitude_rate;/drone3/fmu/in/inertial_acceleration;/drone3/fmu/in/position;/drone3/fmu/in/throtle/attitude;/drone3/fmu/in/throtle/attitude_rate;/drone3/fmu/in/velocity/body;/drone3/fmu/in/velocity/inertial;/drone3/fmu/sensors/barometer;/drone3/fmu/sensors/gps;/drone3/fmu/sensors/gps_info;/drone3/fmu/sensors/imu;/drone3/fmu/status;/drone3/position_error;/drone3/simulator/state;/drone3/statistics/pid;/drone3/total_time;/mocap/pose_enu/drone1;/mocap/pose_enu/drone2;/mocap/pose_enu/drone3;/parameter_events;/performance_metrics;/rosout;/drone1/collision_avoidance_force;/drone2/collision_avoidance_force;/drone3/collision_avoidance_force"/>
   </plugin>
   <plugin ID="UDP Server"/>
   <plugin ID="WebSocket Server"/>

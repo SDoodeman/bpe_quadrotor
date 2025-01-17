@@ -50,11 +50,14 @@ void BpeMode2::initialize() {
         node_->declare_parameter<double>("autopilot.BpeMode2.gains.followers.Kp", 0.0);
         node_->declare_parameter<double>("autopilot.BpeMode2.gains.followers.Kv", 0.0);
         node_->declare_parameter<double>("autopilot.BpeMode2.gains.followers.Kr", 0.0);
-        node_->declare_parameter<double>("autopilot.BpeMode2.gains.followers.Ko", 0.0);
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.avoidance.Ko", 0.0);
+        node_->declare_parameter<double>("autopilot.BpeMode2.gains.avoidance.r",  0.0);
 
         Kp_ = node_->get_parameter("autopilot.BpeMode2.gains.followers.Kp").as_double();
         Kv_ = node_->get_parameter("autopilot.BpeMode2.gains.followers.Kv").as_double();
         Kr_ = node_->get_parameter("autopilot.BpeMode2.gains.followers.Kr").as_double();
+        Ko_ = node_->get_parameter("autopilot.BpeMode2.gains.avoidance.Ko").as_double();
+        r_  = node_->get_parameter("autopilot.BpeMode2.gains.avoidance.r").as_double();
     }
 
     // --------------------------------------------------------------
@@ -70,6 +73,7 @@ void BpeMode2::initialize() {
     node_->declare_parameter<std::string>("autopilot.BpeMode2.publishers.control_attitude_rate", "desired_control_attitude_rate");
     node_->declare_parameter<std::string>("autopilot.BpeMode2.publishers.control_position", "desired_control_position");
     node_->declare_parameter<std::string>("autopilot.BpeMode2.publishers.position_error", "position_error");
+    node_->declare_parameter<std::string>("autopilot.BpeMode2.publishers.collision_avoidance", "collision_avoidance_force");
 
     // Create the publishers
     desired_attitude_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlAttitude>(node_->get_parameter("autopilot.BpeMode2.publishers.control_attitude").as_string(), rclcpp::SensorDataQoS());
@@ -77,6 +81,7 @@ void BpeMode2::initialize() {
     desired_position_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlPosition>(node_->get_parameter("autopilot.BpeMode2.publishers.control_position").as_string(), rclcpp::SensorDataQoS());
     position_error_publisher_ = node_->create_publisher<std_msgs::msg::Float64>(node_->get_parameter("autopilot.BpeMode2.publishers.position_error").as_string(), rclcpp::SensorDataQoS());
     total_time_publisher_ = node_->create_publisher<std_msgs::msg::Float64>("total_time", rclcpp::SensorDataQoS());
+    collision_avoidance_force_publisher_ = node_->create_publisher<pegasus_msgs::msg::ControlPosition>(node_->get_parameter("autopilot.BpeMode2.publishers.collision_avoidance").as_string(), rclcpp::SensorDataQoS());
 
     // --------------------------------------------------------------
     // Subscribe to the position of the other real agents
@@ -100,6 +105,9 @@ void BpeMode2::initialize() {
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 Kp: %f", Kp_);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 Kv: %f", Kv_);
     RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 Kr: %f", Kr_);
+    RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 Ko: %f", Ko_);
+    RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 r: %f", r_);
+    RCLCPP_INFO(this->node_->get_logger(), "BpeMode2 initialized");
 }
 
 void BpeMode2::update(double dt) {
@@ -111,7 +119,8 @@ void BpeMode2::update(double dt) {
     trajectory_generation(dt);
 
     // Compute the desired acceleration
-    Eigen::Vector3d u;
+    Eigen::Vector3d u(0.0, 0.0, 0.0);
+    Eigen::Vector3d fB(0.0, 0.0, 0.0);
 
     // Get the id of the drone in the graph 
     int id = graph_ids_[drone_id_];
@@ -144,8 +153,14 @@ void BpeMode2::update(double dt) {
 
                 // Compute the desired velocity error (for the trajectory to be executed)
                 u += -Kv_ / N_following_ * ((V_[id] - V_[j]) - (vdes_[id] - vdes_[j]));
+
+                // Collission avoidance term (p_ij is -e_i from the paper)
+                fB += Ko_*gij*(gij.dot(V_[j] - V_[id]) / (pij.norm() - r_));
             }
         }
+
+        // Add the collision avoidance term
+        u += fB;
     }
 
     // Compute the desired total force to apply
@@ -183,6 +198,12 @@ void BpeMode2::update(double dt) {
 
     total_time_msg_.data = total_time_;
     total_time_publisher_->publish(total_time_msg_);
+
+    // Publish the repulsive force for obstacle avoidance
+    collision_avoidance_force_msg_.position[0] = fB[0];
+    collision_avoidance_force_msg_.position[1] = fB[1];
+    collision_avoidance_force_msg_.position[2] = fB[2];
+    collision_avoidance_force_publisher_->publish(collision_avoidance_force_msg_);
 }
 
 bool BpeMode2::enter() {
@@ -262,11 +283,6 @@ void BpeMode2::trajectory_generation(double dt) {
 
         // Trajectory for the leader drone
         if (i==0) {
-            // A = 1.5;
-            // Adot = 0;
-            // z = (z_min_ + z_max_) / 2;
-            // zdot = 0;
-
             A = 0.0;
             Adot = 0;
             double min = -1.0;
