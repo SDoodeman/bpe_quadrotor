@@ -237,7 +237,7 @@ void BpeMode2::trajectory_generation(double dt) {
     double z_min_ = -0.5;
     double z_max_ = -2.0;
     double A_offset_ = 0.55;
-    double frequency_ = 0.06;
+    double frequency_ = 0.25;  // 0.2 worked really well - maybe it is just that more PE is needed
 
     // Get the desired trajectory for each agent
     double A, Adot, z, zdot;
@@ -248,7 +248,7 @@ void BpeMode2::trajectory_generation(double dt) {
 
     double t = total_time_;
 
-    double A_min = 0.40;
+    double A_min = 0.30;
 
     for (size_t i = 0; i < n_agents_; i++) {
 

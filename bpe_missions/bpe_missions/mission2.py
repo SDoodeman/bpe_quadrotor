@@ -71,7 +71,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     drones = []
-    n_drones = 2
+    n_drones = 3
     first_drone_id = 1
 
     for i in range(n_drones):
@@ -90,14 +90,14 @@ def main(args=None):
     time.sleep(7)
 
     # Set the waypoints for the drones
-    drones[0].set_waypoint(0.0,  2.0, -0.5, 0.0)
+    drones[0].set_waypoint(0.0,  1.5, -0.5, 0.0)
     drones[0].set_autopilot_mode('WaypointMode')
 
-    drones[1].set_waypoint(-0.55, 0.0, -0.5, 0.0)
+    drones[1].set_waypoint(-0.5, 0.0, -0.5, 0.0)
     drones[1].set_autopilot_mode('WaypointMode')
 
-    # drones[2].set_waypoint(0.0, -1.0, -0.5, 0.0)
-    # drones[2].set_autopilot_mode('WaypointMode')
+    drones[2].set_waypoint(0.0, -1.0, -0.5, 0.0)
+    drones[2].set_autopilot_mode('WaypointMode')
 
     time.sleep(6)
 
@@ -106,7 +106,7 @@ def main(args=None):
         drones[i].set_autopilot_mode('BpeMode2')
 
     # Land the drone
-    time.sleep(200)
+    time.sleep(300)
     for i in range(n_drones):
         drones[i].set_autopilot_mode('LandMode')
 

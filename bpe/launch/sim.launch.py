@@ -17,14 +17,14 @@ def generate_launch_description():
     gazebo_launch_file = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/worlds/empty.launch.py')),
         launch_arguments={
-            'gui': 'false',
+            'gui': 'true',
             }.items())
     
     iris_launch_file = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris_small.launch.py')),
         launch_arguments={  # ENU coordinates
-            'x':  '0.0',
-            'y':  '-0.5',
+            'x':  '1.5',
+            'y':  '0.0',
             'z':  '0.0',
             'launch_pegasus': 'false',
             'vehicle_id': '1',
@@ -33,8 +33,8 @@ def generate_launch_description():
     iris2_launch_file = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris_small.launch.py')),
         launch_arguments={  # ENU coordinates
-            'x':  '-0.5',
-            'y':  '0.0',
+            'x':  '0.0',
+            'y':  '-0.5',
             'z':  '0.0',
             'launch_pegasus': 'false',
             'vehicle_id': '2',
@@ -43,8 +43,8 @@ def generate_launch_description():
     iris3_launch_file = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/vehicles/iris_small.launch.py')),
         launch_arguments={  # ENU coordinates
-            'x':  '0.0',
-            'y':  '0.5',
+            'x':  '-1.0',
+            'y':  '0.0',
             'z':  '0.0',
             'launch_pegasus': 'false',
             'vehicle_id': '3',
