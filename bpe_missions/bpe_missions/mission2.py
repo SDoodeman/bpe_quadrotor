@@ -72,7 +72,7 @@ def main(args=None):
 
     drones = []
     n_drones = 3
-    first_drone_id = 1
+    first_drone_id = 7
 
     for i in range(n_drones):
         drones.append(Drone(i+first_drone_id))

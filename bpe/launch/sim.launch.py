@@ -27,7 +27,7 @@ def generate_launch_description():
             'y':  '0.0',
             'z':  '0.0',
             'launch_pegasus': 'false',
-            'vehicle_id': '1',
+            'vehicle_id': '7',
         }.items())
 
     iris2_launch_file = IncludeLaunchDescription(
@@ -37,7 +37,7 @@ def generate_launch_description():
             'y':  '-0.5',
             'z':  '0.0',
             'launch_pegasus': 'false',
-            'vehicle_id': '2',
+            'vehicle_id': '8',
         }.items())
 
     iris3_launch_file = IncludeLaunchDescription(
@@ -47,7 +47,16 @@ def generate_launch_description():
             'y':  '0.0',
             'z':  '0.0',
             'launch_pegasus': 'false',
-            'vehicle_id': '3',
+            'vehicle_id': '9',
+        }.items())
+
+    # Launch the torus object in the arena
+    torus_launch_file = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pegasus_gazebo'), 'launch/objects/torus.launch.py')),
+        launch_arguments={
+            'x': '0.0',
+            'y': '0.0',
+            'z': '1.2',
         }.items())
     
     # -----------------------------------------------
@@ -65,7 +74,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mocap_emulator'), 'launch/mocap_emulator.launch.py')),
         # Define costume launch arguments/parameters used 
         launch_arguments={
-            'vehicle_id': '1',
+            'vehicle_id': '7',
             'namespace': 'drone',
         }.items(),
     )
@@ -75,7 +84,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mocap_emulator'), 'launch/mocap_emulator.launch.py')),
         # Define costume launch arguments/parameters used 
         launch_arguments={
-            'vehicle_id': '2',
+            'vehicle_id': '8',
             'namespace': 'drone',
         }.items(),
     )
@@ -85,7 +94,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mocap_emulator'), 'launch/mocap_emulator.launch.py')),
         # Define costume launch arguments/parameters used 
         launch_arguments={
-            'vehicle_id': '3',
+            'vehicle_id': '9',
             'namespace': 'drone',
         }.items(),
     )
@@ -96,10 +105,10 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mavlink_interface'), 'launch/mavlink_interface.launch.py')),
         # Define costume launch arguments/parameters used for the mavlink interface
         launch_arguments={
-            'vehicle_id': '1', 
+            'vehicle_id': '7', 
             'namespace': 'drone',
             'drone_params': LaunchConfiguration('drone_params'),
-            'connection': 'udp://:14540',
+            'connection': 'udp://:14546',
             'mavlink_forward': "['']"
         }.items(),
     )
@@ -110,10 +119,10 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mavlink_interface'), 'launch/mavlink_interface.launch.py')),
         # Define costume launch arguments/parameters used for the mavlink interface
         launch_arguments={
-            'vehicle_id': '2', 
+            'vehicle_id': '8', 
             'namespace': 'drone',
             'drone_params': LaunchConfiguration('drone_params'),
-            'connection': 'udp://:14541',
+            'connection': 'udp://:14547',
             'mavlink_forward': "['']"
         }.items(),
     )
@@ -124,10 +133,10 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('mavlink_interface'), 'launch/mavlink_interface.launch.py')),
         # Define costume launch arguments/parameters used for the mavlink interface
         launch_arguments={
-            'vehicle_id': '3', 
+            'vehicle_id': '9', 
             'namespace': 'drone',
             'drone_params': LaunchConfiguration('drone_params'),
-            'connection': 'udp://:14542',
+            'connection': 'udp://:14548',
             'mavlink_forward': "['']"
         }.items(),
     )
@@ -137,7 +146,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('autopilot'), 'launch/autopilot.launch.py')),
         # Define costume launch arguments/parameters used 
         launch_arguments={
-            'vehicle_id': '1',
+            'vehicle_id': '7',
             'namespace': 'drone',
             'autopilot_yaml': LaunchConfiguration('drone_params'),
         }.items(),
@@ -148,7 +157,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('autopilot'), 'launch/autopilot.launch.py')),
         # Define costume launch arguments/parameters used 
         launch_arguments={
-            'vehicle_id': '2',
+            'vehicle_id': '8',
             'namespace': 'drone',
             'autopilot_yaml': LaunchConfiguration('drone_params'),
         }.items(),
@@ -159,7 +168,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('autopilot'), 'launch/autopilot.launch.py')),
         # Define costume launch arguments/parameters used 
         launch_arguments={
-            'vehicle_id': '3',
+            'vehicle_id': '9',
             'namespace': 'drone',
             'autopilot_yaml': LaunchConfiguration('drone_params'),
         }.items(),
@@ -174,6 +183,7 @@ def generate_launch_description():
         iris_launch_file,
         iris2_launch_file,
         iris3_launch_file,
+        torus_launch_file,
         # Launch files for the control system
         drone_params_file_arg,
         mocap_emulator1_launch_file,
