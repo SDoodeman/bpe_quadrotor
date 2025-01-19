@@ -15,7 +15,7 @@ void BpeMode2::initialize() {
 
     // Configure the adjacency matrix
     aij_ << 0, 0, 0,
-            1, 0, 1,
+            1, 0, 0,
             1, 1, 0;
 
     // Get the list of drone ids associated with the leader, the first follower and the second follower
