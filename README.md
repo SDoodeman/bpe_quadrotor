@@ -15,7 +15,7 @@ This work addresses the practical problem of distributed formation tracking cont
 
 ## Numerical results
 The convergence of the system from numerical simulations in MATLAB can be seen in the figure below, where each following drone only has one neighboring agent, and where the formation shape is rescaled to fit through a window.
-![alt text](media/Sim_Rescale.png)
+![alt text](media/SimRescale.png)
 
 ## Experimental results
 A video of an experiment performed using this repository can be found at [youtu.be/-cPlcVHDzzU](https://youtu.be/-cPlcVHDzzU).
