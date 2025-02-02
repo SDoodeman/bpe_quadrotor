@@ -7,13 +7,15 @@ Besides that, they have access to their own attitude.
 Using persistence of excitation, as little as one neighbor is required for each follower drone to still attain the desired formation.
 ![alt text](media/PracticalSetup.png)
 
-![alt text](media/Inner_outer_loop.pdf)
+The used control structure is given below.
+![alt text](media/Inner_outer_loop.png)
 
 ## Paper abstract
 This work addresses the practical problem of distributed formation tracking control of a group of quadrotor vehicles in a relaxed sensing graph topology with a very limited sensor set, where only one leader vehicle can access the global position. Other vehicles in the formation are assumed to only have access to inter-agent bearing (direction) measurements and relative velocities with respect to their neighbor agents. A hierarchical control architecture is adopted for each quadrotor, combining a high-gain attitude inner-loop and an outer-loop bearing-based formation controller with collision avoidance augmentation. The proposed method enables a group of quadrotors to track arbitrary bearing persistently exciting trajectories, including time-varying shapes and rotational maneuvers, such that each quadrotor only requires relative measurements to as little as one neighboring quadrotor. The effective performance of the control strategy is validated by numerical simulations in MATLAB and real-world experiments with three quadrotors.
 
 ## Numerical results
-
+The convergence of the system from numerical simulations in MATLAB can be seen in the figure below, where each following drone only has one neighboring agent, and where the formation shape is rescaled to fit through a window.
+![alt text](media/Sim_Rescale.png)
 
 ## Experimental results
 A video of an experiment performed using this repository can be found at [youtu.be/-cPlcVHDzzU](https://youtu.be/-cPlcVHDzzU).
