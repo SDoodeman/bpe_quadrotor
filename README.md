@@ -18,7 +18,8 @@ The convergence of the system from numerical simulations in MATLAB can be seen i
 ![alt text](media/SimRescale.png)
 
 ## Experimental results
-A video of an experiment performed using this repository can be found at [youtu.be/-cPlcVHDzzU](https://youtu.be/-cPlcVHDzzU).
+A video of an experiment performed using this repository can be found at [youtu.be/-cPlcVHDzzU](https://youtu.be/-cPlcVHDzzU). The effective performance and robustness of the proposed controller for a real quadrotor formation with the presence of aerodynamic influences and disturbances can be seen in the figure below.
+![alt text](media/ExperimentError.png)
 
 ## Installation
 This repository relies on the [Pegasus GNC project](https://pegasusresearch.github.io/pegasus/index.html).
