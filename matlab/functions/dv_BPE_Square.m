@@ -133,7 +133,7 @@ function xdot = dv_BPE_Square(t, x)
         Rde3  = TRd/T;
 
         % Attitude controller (unchanged)
-        Omega = - n1*R(:,:,i).'*skew(Rde3)*R(:,3,i) - m(i)/T*R(:,:,i).'*skew(Rde3)*(eye(3) - Rde3*Rde3.')*Uddot(:,:,i);
+        Omega = n1*skew(e3)*R(:,:,i).'*Rde3 + m(i)/T*(eye(3) - e3*e3')*R(:,:,i).'*skew(Rde3)*Uddot(:,:,i);
 
         % System derivatives
         Pdot(:,:,i) = V(:,:,i);
